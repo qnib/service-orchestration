@@ -1,6 +1,6 @@
 version: '2'
 services:
   httpcheck: #1
-    image: qnib/httpcheck:fail-120s
+    image: qnib/httpcheck:good-60s
     ports:
       - 8080:8080
