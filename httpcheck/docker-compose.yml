@@ -1,0 +1,10 @@
+version: '2'
+services:
+  frontend:
+    image: qnib/httpcheck:good-60s
+    ports:
+      - 8080:8080
+  backend:
+    image: qnib/httpcheck:good-60s
+    ports:
+      - 8090:8080
