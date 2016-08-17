@@ -1,0 +1,17 @@
+version: '2'
+services:
+  consul: #global
+    ports:
+      - 8500:8500
+    networks:
+      - consul-net
+    environment:
+      - DC_NAME=swarm
+      - CONSUL_BOOTSTRAP_EXPECT=3
+      - CONSUL_CLUSTER_IPS=green_consul,blue_consul
+      - CONSUL_SKIP_CURL=true
+    image: qnib/alpn-consul:d12
+
+networks:
+  consul-net:
+    driver: overlay
