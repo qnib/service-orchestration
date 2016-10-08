@@ -1,0 +1,15 @@
+version: '2'
+services:
+  gocd-server: #1
+    image: qnib/d12-gocd-server
+    networks:
+     - consul-net
+    ports:
+     - 8153:8153
+    environment:
+     - DC_NAME=swarm
+     - GOCD_SERVER_CLEAN_WORKSPACE=false
+     - CONSUL_CLUSTER_IPS=qnib-consul
+    volumes:
+     - /srv/go-server/serverBackups/:/opt/go-server/artifacts/serverBackups/
+     - /srv/go-server/pipelines/:/srv/go-server/pipelines/
