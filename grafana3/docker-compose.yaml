@@ -7,7 +7,9 @@ services:
     environment:
      - DC_NAME=swarm
      - COLLECT_METRICS=false
-     - CONSUL_CLUSTER_IPS=qnib-consul
+     - CONSUL_CLUSTER_IPS=consul
      - CONSUL_NODE_NAME=grafana3
     ports:
      - 3000:3000
+    labels:
+      - "org.qnib.service.depend_on=consul,influxdb"
