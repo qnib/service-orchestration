@@ -1,0 +1,19 @@
+version: '2'
+services:
+  qcollect: #global
+    image: qnib/qcollect
+    networks:
+      - consul-net
+    environment:
+      - CONSUL_DC_NAME=swarm
+      - DC_NAME=swarm
+      - QCOLLECT_INFLUXDB_ENABLED=true
+      - QCOLLECT_INFLUXDB_SERVER=influxdb
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - QCOLLECT_INTERVAL=2
+      - CONSUL_CLUSTER_IPS=qnib-consul
+      - CONSUL_NODE_NAME=qcollect
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "org.qnib.service.depend_on=influxdb"
