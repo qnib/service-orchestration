@@ -1,0 +1,16 @@
+version: '2'
+services:
+  influxdb: #1
+    image: qnib/influxdb:shuttle6
+    networks:
+     - consul-net
+    environment:
+     - DC_NAME=swarm
+     - COLLECT_METRICS=false
+     - INFLUXDB_DATABASES=qcollect
+     - CONSUL_CLUSTER_IPS=qnib-consul
+     - INFLUXDB_META_LOGGING=true
+    ports:
+     - 2003:2003
+     - 8083:8083
+     - 8086:8086
