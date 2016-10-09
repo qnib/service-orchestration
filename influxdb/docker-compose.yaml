@@ -6,6 +6,7 @@ services:
      - consul-net
     environment:
      - DC_NAME=swarm
+     - CONSUL_NODE_NAME=influxdb
      - COLLECT_METRICS=false
      - INFLUXDB_DATABASES=qcollect
      - CONSUL_CLUSTER_IPS=qnib-consul
