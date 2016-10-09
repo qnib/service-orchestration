@@ -10,6 +10,8 @@ services:
      - DC_NAME=swarm
      - GOCD_SERVER_CLEAN_WORKSPACE=false
      - CONSUL_CLUSTER_IPS=qnib-consul
+     # if more then one service is started, this is going to cause trouble
+     - CONSUL_NODE_NAME=gocd-server
     volumes:
      - /srv/go-server/serverBackups/:/opt/go-server/artifacts/serverBackups/
      - /srv/go-server/pipelines/:/srv/go-server/pipelines/

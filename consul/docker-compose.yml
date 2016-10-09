@@ -1,6 +1,6 @@
 version: '2'
 services:
-  consul: #global
+  consul: #1
     ports:
       - 8500:8500
     networks:
@@ -9,6 +9,8 @@ services:
       - DC_NAME=swarm
       - CONSUL_BOOTSTRAP_EXPECT=1
       - CONSUL_SKIP_CURL=true
+      # if more then one service is started, this is going to cause trouble
+      - CONSUL_NODE_NAME=consul
     image: qnib/alpn-consul:d12
     volumes:
       - /etc/hostname:/etc/docker-hostname
