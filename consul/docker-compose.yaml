@@ -1,6 +1,7 @@
 version: '2'
 services:
   consul: #1
+    image: qnib/alpn-consul
     ports:
       - 8500:8500
     networks:
@@ -11,9 +12,6 @@ services:
       - CONSUL_SKIP_CURL=true
       # if more then one service is started, this is going to cause trouble
       - CONSUL_NODE_NAME=consul
-    image: qnib/alpn-consul:d12
-    volumes:
-      - /etc/hostname:/etc/docker-hostname
 
 networks:
   consul-net:
