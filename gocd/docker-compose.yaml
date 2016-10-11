@@ -1,7 +1,7 @@
 version: '2'
 services:
   gocd-server: #1
-    image: qnib/d12-gocd-server
+    image: qnib/gocd-server:d12
     networks:
      - consul-net
     ports:
@@ -14,9 +14,11 @@ services:
      - CONSUL_NODE_NAME=gocd-server
     labels:
       - "org.qnib.service.depend_on=consul"
-    volumes:
-     - /srv/go-server/serverBackups/:/opt/go-server/artifacts/serverBackups/
-     - /srv/go-server/pipelines/:/srv/go-server/pipelines/
+    ### To persist your pipelines and backups, choose a path here. 
+    ## !!! The path must exist, otherwise the service won't start
+    #volumes:
+    #  - /srv/go-server/serverBackups/:/opt/go-server/artifacts/serverBackups/
+    #  - /srv/go-server/pipelines/:/srv/go-server/pipelines/
 
   gocd-agent: #global
     image: qnib/d12-alpn-gocd-agent
@@ -31,3 +33,7 @@ services:
      - GO_SERVER=gocd-server
      - GOCD_LOCAL_DOCKERENGINE=false
      - CONSUL_CLUSTER_IPS=consul
+
+networks:
+  consul-net:
+    external: true
