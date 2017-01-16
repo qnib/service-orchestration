@@ -1,20 +1,16 @@
-version: '2'
+version: '3'
 services:
-  elasticsearch: #global
-    image: qnib/alpn-elasticsearch:2.3.5
-    networks:
-     - consul-net
+  elasticsearch:
+    image: qnib/plain-elasticsearch:2.3.5
     environment:
-     - DC_NAME=swarm
      - ES_CLUSTER_NAME=swarm
-     - CONSUL_CLUSTER_IPS=green_consul,blue_consul
     ports:
      - 9200:9200
      - 9300:9300
     volumes:
-     - /opt/elasticsearch/data/
-     - /opt/elasticsearch/logs/
+     - es-data:/opt/elasticsearch/data/
+     - es-logs:/opt/elasticsearch/logs/
 
-networks:
-  consul-net:
-    driver: overlay
+volumes:
+    es-data:
+    es-logs:
