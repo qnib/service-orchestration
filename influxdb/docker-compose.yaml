@@ -1,19 +1,26 @@
-version: '2'
+version: '3'
 services:
-  influxdb: #1
-    image: qnib/influxdb
-    networks:
-     - consul-net
+  backend:
+    image: qnib/plain-influxdb
     environment:
-     - DC_NAME=swarm
-     - CONSUL_NODE_NAME=influxdb
-     - COLLECT_METRICS=false
      - INFLUXDB_DATABASES=qcollect
-     - CONSUL_CLUSTER_IPS=consul
      - INFLUXDB_META_LOGGING=true
+     - INFLUXDB_OPENTSDB_ENABLED=true
+     - INFLUXDB_GRAPHITE_ENABLED=true
+    volumes:
+     - influx-data:/opt/influxdb/shared
     ports:
      - 2003:2003
+     - 4242:4242
      - 8083:8083
      - 8086:8086
-    labels:
-      - "org.qnib.service.depend_on=consul"
+
+  frontend:
+    image: qnib/plain-grafana4
+    ports:
+     - 3000:3000
+    environment:
+     - QCOLLECT_HOST=http://influxdb_backend:8086
+
+volumes:
+  influx-data:
