@@ -1,0 +1,23 @@
+version: '3'
+services:
+  server:
+    image: qnib/alplain-gocd-server
+    ports:
+     - 8153:8153
+     - 8154:8154
+    environment:
+     - GOCD_SERVER_CLEAN_WORKSPACE=false
+     - GOCD_AGENT_AUTOENABLE_KEY=qnibFTW
+    volumes:
+     - gocd-data:/opt/go-server/artifacts/serverBackups/
+  agent:
+    image: qnib/alplain-gocd-agent
+    environment:
+     - GO_SERVER=gocd_server
+     - DOCKER_HOST=unix:///var/run/docker.sock
+     - GOCD_AGENT_AUTOENABLE_KEY=qnibFTW
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  gocd-data:
