@@ -2,16 +2,26 @@ version: '3'
 services:
   server:
     image: qnib/alplain-gocd-server
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
     ports:
      - 8153:8153
-     - 8154:8154
+    volumes:
+     - /var/lib/gocd/serverBackups:/opt/go-server/artifacts/serverBackups
     environment:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
-     - GOCD_AGENT_AUTOENABLE_KEY=qnibFTW
-    volumes:
-     - gocd-data:/opt/go-server/artifacts/serverBackups/
+     - STDOUT_LOG_FILE=/dev/stdout
   agent:
     image: qnib/alplain-gocd-agent
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
     environment:
      - GO_SERVER=gocd_server
      - DOCKER_HOST=unix:///var/run/docker.sock
@@ -19,5 +29,3 @@ services:
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock
 
-volumes:
-  gocd-data:
