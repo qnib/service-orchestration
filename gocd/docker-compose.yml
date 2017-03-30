@@ -19,7 +19,7 @@ services:
   agent:
     image: qnib/alplain-gocd-agent
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
     environment:
