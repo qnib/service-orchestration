@@ -9,8 +9,8 @@ IMG_NAME=$(find ./target/ -name "*.image_name" |head -n1)
 ## Which current images are used?
 docker service ls |grep "${SERVICE}_" |awk '{print $2" "$5}' | while read l
 do
-  SVC_NAME=$(echo $l |awk '{print $0}' |cut -d'_' -f 2-)
-  IMG_FULL=$(echo $l |awk '{print $1}')
+  SVC_NAME=$(echo $l |awk '{print $1}' |cut -d'_' -f 2-)
+  IMG_FULL=$(echo $l |awk '{print $2}')
   IMG_NAME=$(echo ${IMG_FULL} |awk -F/ '{print $NF}' |awk -F'\:|@' '{print $1}')
   echo "[DEBUG] ${SVC_NAME} uses currently ${IMG_FULL}"
   if [[ -f ./target/${IMG_NAME}.image_name ]];then
