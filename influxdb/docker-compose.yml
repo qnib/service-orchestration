@@ -1,7 +1,7 @@
 version: '3'
 services:
   backend:
-    image: ${INFLUX_IMG:-qnib/plain-influxdb}
+    image: ${BACKEND_IMG:-qnib/plain-influxdb}
     environment:
      - INFLUXDB_DATABASES=qcollect
      - INFLUXDB_META_LOGGING=true
@@ -16,7 +16,7 @@ services:
      - 8086:8086
 
   frontend:
-    image: ${GRAFANA_IMG:-qnib/plain-grafana4}
+    image: ${FRONTEND_IMG:-qnib/plain-grafana4}
     ports:
      - 3000:3000
     environment:
