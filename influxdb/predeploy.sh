@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATA_DIR=${DATA_DIR:-/var/lib/influxdb/}
+DATA_DIR=${DATA_DIR:-/var/lib/}
 
 echo "[II] Ensure data dir '${DATA_DIR}/{grafana/sql,influxdb}' is present"
 # Idempotent, as it uses 'mkdir -p'. Even though it mounts the root of the server it can 'only' create arbitrary directories.
