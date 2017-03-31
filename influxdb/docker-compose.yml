@@ -8,7 +8,7 @@ services:
      - INFLUXDB_OPENTSDB_ENABLED=true
      - INFLUXDB_GRAPHITE_ENABLED=true
     volumes:
-     - influx-data:/opt/influxdb/shared
+     - ${DATA_DIR}:/opt/influxdb/shared
     ports:
      - 2003:2003
      - 4242:4242
@@ -21,6 +21,3 @@ services:
      - 3000:3000
     environment:
      - QCOLLECT_HOST=http://influxdb_backend:8086
-
-volumes:
-  influx-data:
