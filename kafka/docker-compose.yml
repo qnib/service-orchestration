@@ -1,0 +1,52 @@
+version: '3'
+services:
+  zookeeper:
+    image: qnib/plain-zookeeper:3.4.10@sha256:593f8b807412837d52be111575a544b9fcb4db79868cab1c6819fbcc9c0568b7
+    ports:
+      - "2181:2181"
+  zkui:
+    image: qnib/plain-zkui:8d3441d@sha256:d66972bd886ade9a8d7383f5064bd825f6d29275a282250cb0adf52475f67726
+    ports:
+      - "9090:9090"
+  broker:
+    image: qnib/plain-kafka@sha256:192b2acdce269b31e894c86ec7fd88a1e7e701cd5ac5d55cd20bcea6c885b332
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
+    ports:
+      - "9092:9092"
+    environment:
+      SWARM_TASK_ID: '{{.Task.Slot}}'
+  kafka-manager:
+    image: qnib/plain-kafka-manager
+    ports:
+      - "9001:9000"
+    environment:
+      ZK_SERVER: "tasks.zookeeper:2181"
+  prometheus:
+    image: qnib/plain-prometheus:1.7.1-3@sha256:9e5f625a6684c8e1f9995091923cc5144e84a66914392cd1ecbe518ba9f2f261
+    ports:
+      - "9091:9090"
+    environment:
+      PROMETHEUS_STATIC_SCRAPE_LIST: ""
+      PROMETHEUS_DNS_SCRAPE_LIST: "kafka:tasks.broker:7071:/:1s,zookeeper:tasks.zookeeper:7071:/:1s"
+      STORAGE_ADAPTER_HOST: "tasks.storage-adapter"
+      STORAGE_ADAPTER_PORT: "9201"
+  storage-adapter:
+    image: qnib/plain-prometheus-remote-storage@sha256:4cb6929eb83c2f171b51877ea77765c9f6f31b081710ffa7e0c1230abf6b96e1
+  influxdb:
+    image: qnib/plain-influxdb:1.3.5@sha256:fd65e66b559b3a9f367051212804bb1da9cf115b0fd93663bef4f522702bc5ab
+    environment:
+     - INFLUXDB_DATABASES=prometheus
+     - INFLUXDB_META_LOGGING=false
+    volumes:
+     - /opt/influxdb/shared
+    ports:
+     - 8083:8083
+     - 8086:8086
+  grafana:
+    image: qnib/plain-grafana4:4.4.3-1@sha256:934da3208a7f9d792507fc6cacf8138bf559e565db54206a6b568cc15df846d5
+    ports:
+     - 3000:3000
+    environment:
+      - GRAFANA_DATA_SOURCES=prometheus,influxdb
+      - INFLUXDB_HOST=tasks.influxdb
+      - INFLUXDB_DB=prometheus
