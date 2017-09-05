@@ -9,7 +9,7 @@ services:
     ports:
       - "9090:9090"
   kafka-manager:
-    image: qnib/plain-kafka-manager@sha256:045d0d5cbbbc1937baf4cb0a269b193117b193b3cd71c88abab5a579f6b1308f
+    image: qnib/plain-kafka-manager@sha256:ef6d4e250264c436d647023e16fce22408d299086d9301668cd40b7eb1529228
     ports:
       - "9001:9000"
     environment:
