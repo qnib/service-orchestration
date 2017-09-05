@@ -8,13 +8,6 @@ services:
     image: qnib/plain-zkui@sha256:d66972bd886ade9a8d7383f5064bd825f6d29275a282250cb0adf52475f67726
     ports:
       - "9090:9090"
-  broker:
-    image: qnib/plain-kafka@sha256:192b2acdce269b31e894c86ec7fd88a1e7e701cd5ac5d55cd20bcea6c885b332
-    hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
-    ports:
-      - "9092:9092"
-    environment:
-      SWARM_TASK_ID: '{{.Task.Slot}}'
   kafka-manager:
     image: qnib/plain-kafka-manager@sha256:045d0d5cbbbc1937baf4cb0a269b193117b193b3cd71c88abab5a579f6b1308f
     ports:

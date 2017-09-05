@@ -1,0 +1,16 @@
+version: '3'
+services:
+  broker:
+    # qnib/uplain-kafka:0.10.0.1
+    image: qnib/plain-kafka@sha256:1af3e143a5a9598f3f6199f5571689285db746612342164d2d473e59d193c965
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
+    networks:
+      - kafka_default
+    ports:
+      - "9092:9092"
+    environment:
+      SWARM_TASK_ID: '{{.Task.Slot}}'
+
+networks:
+  kafka_default:
+    external: true
