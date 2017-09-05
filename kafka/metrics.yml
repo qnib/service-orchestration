@@ -1,0 +1,43 @@
+version: '3'
+services:
+  prometheus:
+    image: qnib/plain-prometheus@sha256:9e5f625a6684c8e1f9995091923cc5144e84a66914392cd1ecbe518ba9f2f261
+    networks:
+      - kafka_default
+    ports:
+      - "9091:9090"
+    environment:
+      PROMETHEUS_STATIC_SCRAPE_LIST: ""
+      PROMETHEUS_DNS_SCRAPE_LIST: "kafka:tasks.broker:7071:/:1s,zookeeper:tasks.zookeeper:7071:/:1s"
+      STORAGE_ADAPTER_HOST: "tasks.storage-adapter"
+      STORAGE_ADAPTER_PORT: "9201"
+  storage-adapter:
+    image: qnib/plain-prometheus-remote-storage@sha256:4cb6929eb83c2f171b51877ea77765c9f6f31b081710ffa7e0c1230abf6b96e1
+    networks:
+      - kafka_default
+  influxdb:
+    image: qnib/plain-influxdb@sha256:fd65e66b559b3a9f367051212804bb1da9cf115b0fd93663bef4f522702bc5ab
+    networks:
+     - kafka_default
+    environment:
+     - INFLUXDB_DATABASES=prometheus
+     - INFLUXDB_META_LOGGING=false
+    volumes:
+     - /opt/influxdb/shared
+    ports:
+     - 8083:8083
+     - 8086:8086
+  grafana:
+    image: qnib/plain-grafana4@sha256:c63b3a77369ab3490494f069069ca151201623cb71bebf6c6abbe38029bb3c9e
+    networks:
+      - kafka_default
+    ports:
+      - 3000:3000
+    environment:
+      - GRAFANA_DATA_SOURCES=prometheus,influxdb
+      - INFLUXDB_HOST=tasks.influxdb
+      - INFLUXDB_DB=prometheus
+
+networks:
+  kafka_default:
+    external: true
