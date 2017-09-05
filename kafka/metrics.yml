@@ -1,7 +1,7 @@
 version: '3'
 services:
   prometheus:
-    image: qnib/plain-prometheus@sha256:9e5f625a6684c8e1f9995091923cc5144e84a66914392cd1ecbe518ba9f2f261
+    image: qnib/plain-prometheus:1.7.1-4@sha256:da042d1beda09728f8639aa33c41363e0bf83e6ca39f11e6d768417dd5c92c1c
     networks:
       - kafka_default
     ports:
@@ -12,11 +12,11 @@ services:
       STORAGE_ADAPTER_HOST: "tasks.storage-adapter"
       STORAGE_ADAPTER_PORT: "9201"
   storage-adapter:
-    image: qnib/plain-prometheus-remote-storage@sha256:4cb6929eb83c2f171b51877ea77765c9f6f31b081710ffa7e0c1230abf6b96e1
+    image: qnib/plain-prometheus-remote-storage:aa5cdcb@sha256:4cb6929eb83c2f171b51877ea77765c9f6f31b081710ffa7e0c1230abf6b96e1
     networks:
       - kafka_default
   influxdb:
-    image: qnib/plain-influxdb@sha256:fd65e66b559b3a9f367051212804bb1da9cf115b0fd93663bef4f522702bc5ab
+    image: qnib/plain-influxdb:1.3.5@sha256:fd65e66b559b3a9f367051212804bb1da9cf115b0fd93663bef4f522702bc5ab
     networks:
      - kafka_default
     environment:
@@ -28,7 +28,7 @@ services:
      - 8083:8083
      - 8086:8086
   grafana:
-    image: qnib/plain-grafana4@sha256:c63b3a77369ab3490494f069069ca151201623cb71bebf6c6abbe38029bb3c9e
+    image: qnib/plain-grafana4:4.4.3-2@sha256:b84a409fa089a4c93b950d279e48ea9edddfb4265bf1fa8ce8b49e9f038a5a45
     networks:
       - kafka_default
     ports:

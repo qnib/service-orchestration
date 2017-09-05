@@ -1,8 +1,7 @@
 version: '3'
 services:
   broker:
-    # 0.10.2.1
-    image: qnib/uplain-kafka@sha256:bb219a13af410b6b3fc3cc6312117ba61dce0f6055b269b71c2a283db7c29617
+    image: qnib/uplain-kafka:0.10.2.1@sha256:bb219a13af410b6b3fc3cc6312117ba61dce0f6055b269b71c2a283db7c29617
     hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
     networks:
       - kafka_default
