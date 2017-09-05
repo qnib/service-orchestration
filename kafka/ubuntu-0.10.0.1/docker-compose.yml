@@ -2,7 +2,7 @@ version: '3'
 services:
   broker:
     # qnib/uplain-kafka:0.10.0.1
-    image: qnib/plain-kafka@sha256:1af3e143a5a9598f3f6199f5571689285db746612342164d2d473e59d193c965
+    image: qnib/uplain-kafka@sha256:cbd86f54dbf41b4dbdf25f6fe8af03452c7f0237e2ebf8e29ff9591cfe39e03d
     hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
     networks:
       - kafka_default
@@ -10,7 +10,7 @@ services:
       - "9092:9092"
     environment:
       SWARM_TASK_ID: '{{.Task.Slot}}'
-
+      ADVERTISED_LISTENERS: "tasks.broker"
 networks:
   kafka_default:
     external: true
