@@ -1,25 +1,30 @@
 version: '3'
 services:
   backend:
-    image: ${BACKEND_IMG:-qnib/plain-influxdb}
+    image: ${BACKEND_IMG:-qnib/plain-influxdb@sha256:562d863843c48700b6d8d84c953ad86080b109c598e488733639c2d5cce7df65}
     environment:
      - INFLUXDB_DATABASES=qcollect
      - INFLUXDB_META_LOGGING=true
      - INFLUXDB_OPENTSDB_ENABLED=true
      - INFLUXDB_GRAPHITE_ENABLED=true
     volumes:
-     - ${DATA_DIR}/influxdb:/opt/influxdb/shared
+     - /opt/influxdb/shared
     ports:
      - 2003:2003
      - 4242:4242
      - 8083:8083
      - 8086:8086
 
+  chronograf:
+    image: qnib/plain-chronograf:0.1.3.7@sha256:23cf1696820dc8c2d3dbb9d11388c8465d68d9256dd38ab5a4f1a38adf579128
+    ports:
+     - 8888:8888
+    environment:
+     - INFLUXDB_HOST=tasks.backend
+
   frontend:
-    image: ${FRONTEND_IMG:-qnib/plain-grafana4}
+    image: ${FRONTEND_IMG:-qnib/plain-grafana4:4.5.2@sha256:2576e82a6300be760d82e941202afbab9bb7531b6bd9e115d150864c5daf93a3}
     ports:
      - 3000:3000
     environment:
-     - QCOLLECT_HOST=http://${SERVICE:-influxdb}_backend:8086
-    volumes:
-     - ${DATA_DIR}/grafana/sql:/opt/grafana/sql
+     - INFLUXDB_HOST=tasks.backend
