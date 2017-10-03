@@ -1,4 +1,0 @@
-version: '2'
-services:
-  es:
-    image: qnib/plain-elasticsearch:2.4
