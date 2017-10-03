@@ -23,7 +23,9 @@ The directories starting with a capital letter are holding the different sub-sta
   - **Alerting**
     - (*to-be-added*) *Bosun* Framework which can plug into InfluxDB or Graphite.
     - (*to-be-added*) *Prometheus* Collection, scratch-backend and alerting tool
-  - **Stream Processing**
+- **Data Pipeline**
+    - *Kafka* Distributed streaming platform used as a big pipe to allow multiple services to push and subscribe to data flowing through.
+- **Stream Processing**
     - (*to-be-added*) *KSQL* SQL Stream processing with Kafka Streams
 
 ## Use-Cases
