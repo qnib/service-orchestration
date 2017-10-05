@@ -13,6 +13,10 @@ Creating service ksql_manager
 Creating service ksql_qframe
 ```
 
+After a couple of seconds (when all image are downloaded and started), open [http://localhost:9000](http://localhost:9092) to get an insight into kafka using the kafka-manager.
+
+![](pics/km.gif)
+
 ### Producer
 
 To feed the KSQL processor a qframe agent is put in place, subscribing to the docker events' API and publishing the events to the topic `cnt_event`.
