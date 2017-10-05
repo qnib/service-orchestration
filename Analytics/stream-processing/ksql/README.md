@@ -1,6 +1,18 @@
 # KSQL
 Stack to push docker events into kafka and use the KSQL stream processor to join the different events.
 
+## Start the Stack
+
+```
+$ docker stack deploy -c docker-compose.yml ksql
+Creating service ksql_engine
+Creating service ksql_kafkacat
+Creating service ksql_zookeeper
+Creating service ksql_broker
+Creating service ksql_manager
+Creating service ksql_qframe
+```
+
 ### Producer
 
 To feed the KSQL processor a qframe agent is put in place, subscribing to the docker events' API and publishing the events to the topic `cnt_event`.
