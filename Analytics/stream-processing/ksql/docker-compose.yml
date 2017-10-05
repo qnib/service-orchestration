@@ -25,3 +25,6 @@ services:
     image: qnib/plain-ksql@sha256:313df3edfc8d58f277921496e97d965a850d2096b36380283ce66a9c7a3b30bd
     environment:
       KAFKA_BROKERS: "tasks.broker:9092"
+  kafkacat:
+    image: qnib/plain-kafkacat
+    command: tail -f /dev/null
