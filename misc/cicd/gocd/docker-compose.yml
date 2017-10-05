@@ -1,31 +1,59 @@
-version: '3'
+version: '3.3'
 services:
   server:
-    image: qnib/alplain-gocd-server
+    image: qnib/alplain-gocd-server:dirty
     deploy:
       replicas: 1
-      restart_policy:
-        condition: on-failure
       placement:
         constraints:
           - node.role == manager
     ports:
      - 8153:8153
+     - 8154:8154
+    deploy:
+      placement:
+        constraints:
+          - engine.labels.org.gaikai.hostname==wrex1
+    configs:
+      - source: gocd_config
+        target: /opt/qnib/gocd/gocd-config.tar
+        uid: '0'
+        gid: '0'
+        mode: 0400
+    secrets:
+      - source: gocd_password_properties
+        target: /etc/go/password.properties
+        uid: '1000'
+        gid: '1000'
+        mode: 0440
+    healthcheck:
+      disable: true
+    #command: wait.sh
     volumes:
-     - /var/lib/gocd/serverBackups:/opt/go-server/artifacts/serverBackups
+     - /gocd/backups:/opt/go-server/artifacts/serverBackups/
+     - /gocd/pipelines:/opt/go-server/artifacts/pipelines/
     environment:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
-     - STDOUT_LOG_FILE=/dev/stdout
+     - GOCD_AGENT_AUTOENABLE_KEY=qnibFTW
   agent:
-    image: qnib/alplain-gocd-agent
+    image: qnib/alplain-gocd-agent:dirty
     deploy:
-      replicas: 1
+      replicas: 0
+      update_config:
+        parallelism: 1
+        delay: 30s
       restart_policy:
         condition: on-failure
     environment:
-     - GO_SERVER=gocd_server
+     - GO_SERVER_URL=https://tasks.server:8154/go
      - DOCKER_HOST=unix:///var/run/docker.sock
      - GOCD_AGENT_AUTOENABLE_KEY=qnibFTW
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock
 
+secrets:
+  gocd_password_properties:
+    file: ./gocd_password_properties
+configs:
+  gocd_config:
+    file: ./config/gocd-config.tar
