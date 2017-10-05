@@ -3,7 +3,13 @@ Stack to push docker events into kafka and use the KSQL stream processor to join
 
 ### Producer
 
-To feed the KSQL processor a producer is used. Just create a new bash in the broker and drop `JMX_PORT`.
+To feed the KSQL processor a qframe agent is put in place, subscribing to the docker events' API and publishing the events to the topic `cnt_event`.
+A starting container will publish the container information to `cnt_detail`.
+
+**ToDo**:
+
+- [] The agent should totally normalize the information (swarm node, services, etc.) so the KSQL can JOIN the information again.
+- [] Drop the health-check events? Or maybe not to be able to alert on missing health-checks.
 
 ### Consumer
 
