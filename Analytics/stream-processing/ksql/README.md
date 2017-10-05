@@ -8,8 +8,8 @@ A starting container will publish the container information to `cnt_detail`.
 
 **ToDo**:
 
-- [] The agent should totally normalize the information (swarm node, services, etc.) so the KSQL can JOIN the information again.
-- [] Drop the health-check events? Or maybe not to be able to alert on missing health-checks.
+- [ ] The agent should totally normalize the information (swarm node, services, etc.) so the KSQL can JOIN the information again.
+- [ ] Drop the health-check events? Or maybe not to be able to alert on missing health-checks.
 
 ### Consumer
 
