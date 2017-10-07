@@ -18,7 +18,7 @@ services:
     environment:
       ZOOKEEPER_HOSTS: "tasks.zookeeper:2181"
   qframe:
-    image: qnib/qframe-ksql@sha256:b6564c8ef8d16b7ee5690985f9add746655cf8afe78b25c72a974973bf846b9b
+    image: qnib/qframe-ksql:0.1.2@sha256:9a0f909d713c733f852a8efad59a9d550053067237bec7574577ebda628b3327
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   engine:

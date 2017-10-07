@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   server:
-    image: qnib/alplain-gocd-server:dirty
+    image: qnib/alplain-gocd-server:17.10.0
     deploy:
       replicas: 1
       placement:
@@ -10,16 +10,12 @@ services:
     ports:
      - 8153:8153
      - 8154:8154
-    deploy:
-      placement:
-        constraints:
-          - engine.labels.org.gaikai.hostname==wrex1
-    configs:
-      - source: gocd_config
-        target: /opt/qnib/gocd/gocd-config.tar
-        uid: '0'
-        gid: '0'
-        mode: 0400
+    #configs:
+    #  - source: gocd_config
+    #    target: /opt/qnib/gocd/gocd-config.tar
+    #    uid: '0'
+    #    gid: '0'
+    #    mode: 0400
     secrets:
       - source: gocd_password_properties
         target: /etc/go/password.properties
@@ -28,20 +24,17 @@ services:
         mode: 0440
     healthcheck:
       disable: true
-    #command: wait.sh
-    volumes:
-     - /gocd/backups:/opt/go-server/artifacts/serverBackups/
-     - /gocd/pipelines:/opt/go-server/artifacts/pipelines/
     environment:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
      - GOCD_AGENT_AUTOENABLE_KEY=qnibFTW
   agent:
-    image: qnib/alplain-gocd-agent:dirty
+    image: qnib/alplain-gocd-agent:17.10.0
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
     deploy:
-      replicas: 0
+      replicas: 1
       update_config:
         parallelism: 1
-        delay: 30s
+        delay: 5s
       restart_policy:
         condition: on-failure
     environment:
@@ -54,6 +47,6 @@ services:
 secrets:
   gocd_password_properties:
     file: ./gocd_password_properties
-configs:
-  gocd_config:
-    file: ./config/gocd-config.tar
+#configs:
+#  gocd_config:
+#    file: ./config/gocd-config.tar
