@@ -4,12 +4,8 @@ services:
     image: qnib/plain-zookeeper:3.4.10@sha256:593f8b807412837d52be111575a544b9fcb4db79868cab1c6819fbcc9c0568b7
     ports:
       - "2181:2181"
-  zkui:
-    image: qnib/plain-zkui:8d3441d@sha256:d66972bd886ade9a8d7383f5064bd825f6d29275a282250cb0adf52475f67726
-    ports:
-      - "9090:9090"
   kafka-manager:
-    image: qnib/plain-kafka-manager:1.3.3.13@sha256:ef6d4e250264c436d647023e16fce22408d299086d9301668cd40b7eb1529228
+    image: qnib/plain-kafka-manager:1.3.3.14@sha256:1582cfe5ecb60a52f3ebc137cabde628923f50b8bae22e8edd7121fc72ea740a
     ports:
       - "9001:9000"
     environment:
