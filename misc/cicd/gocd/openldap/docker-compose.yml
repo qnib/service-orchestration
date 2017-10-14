@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   slapd:
-    image: qnib/plain-openldap-qnibinc@sha256:5c4e7ee0aff39db21981424da5f927fc5532f486519c802f686754ec200f6fb3
+    image: qnib/plain-openldap-qnibinc@sha256:5d9316020781797628e3841dc794118cc9643c65c476fc3cf7aa7dcfe0700958
   server:
     image: qnib/alplain-gocd-server:17.10.0@sha256:f08ca8d31036d9a1e1ce2327fc606febfbbc011d5ab1db52f72b8be431d54ccf
     deploy:
