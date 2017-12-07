@@ -18,7 +18,7 @@ services:
     environment:
      - INFLUXDB_HOST=tasks.backend
   frontend:
-    image: qnib/plain-grafana4:4.6.1-5
+    image: qnib/plain-grafana4:4.6.2
     ports:
      - 3000:3000
     environment:
@@ -40,16 +40,32 @@ services:
           memory: 128M
         reservations:
           memory: 64M
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    pid: "host"
+    networks: [hostnet]
   prometheus:
-    image: qnib/plain-prometheus
+    image: qnib/plain-prometheus:2.0
     ports:
       - "9090:9090"
     environment:
         STORAGE_ADAPTER_HOST: tasks.prometheus-storage-adapter:9201
-        PROMETHEUS_STATIC_SCRAPE_LIST: dockerd:172.17.0.1:9323:/metrics
+        PROMETHEUS_STATIC_SCRAPE_LIST: dockerd:172.17.0.1:9323:/metrics,node:172.17.0.1:9100:/metrics
         PROMETHEUS_DNS_SCRAPE_LIST: cadvisor:tasks.cadvisor:8080:/metrics
   prometheus-storage-adapter:
     image: qnib/plain-prometheus-remote-storage
     environment:
       INFLUXDB_HOST: tasks.backend
       INFLUXDB_DB: metrics
+
+networks:
+  hostnet:
+    external:
+      name: host
