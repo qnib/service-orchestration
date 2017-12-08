@@ -6,6 +6,7 @@ This stack spins up
  - **prometheus** to scrape metrics information from the docker-engine and generic container information
  - **Grafana4** as frontend
  - **cAdvisor** to sample container metrics for Prometheus to fetch
+ - The **node-exporter** will provide metrics from the underlying node
  - **prometheus-remote-storage** in order to use InfluxDB as a persistant storage.
 
 

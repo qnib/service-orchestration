@@ -18,7 +18,7 @@ services:
     environment:
      - INFLUXDB_HOST=tasks.backend
   frontend:
-    image: qnib/plain-grafana4:4.6.2
+    image: qnib/plain-grafana4:4.6.2-7
     ports:
      - 3000:3000
     environment:
