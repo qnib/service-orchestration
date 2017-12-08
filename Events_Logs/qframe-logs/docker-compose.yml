@@ -1,0 +1,66 @@
+version: '3'
+services:
+  influxdb:
+    image: qnib/plain-influxdb:1.3.7@sha256:a8df362b7a951a8cc70850c2eb8a0cdd2876d29adbf74776580e4212c618c3f2
+    environment:
+     - INFLUXDB_DATABASES=qframe
+     - INFLUXDB_META_LOGGING=true
+    volumes:
+     - /opt/influxdb/shared
+    ports:
+     - 2003:2003
+     - 4242:4242
+     - 8086:8086
+  chronograf:
+    image: qnib/plain-chronograf:0.1.3.7@sha256:23cf1696820dc8c2d3dbb9d11388c8465d68d9256dd38ab5a4f1a38adf579128
+    ports:
+     - 8888:8888
+    environment:
+     - INFLUXDB_HOST=tasks.influxdb
+  frontend:
+    image: qnib/plain-grafana4:4.6.2-7
+    ports:
+     - 3000:3000
+    environment:
+     - INFLUXDB_HOST=tasks.influxdb
+     - INFLUXDB_DB=qframe
+  elasticsearch:
+    image: qnib/plain-elasticsearch:6.0.1
+    healthcheck:
+      disable: false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_HEAP_MAX: "512m"
+      ES_HEAP_MIN: "512m"
+      ES_NODE_MASTER: "true"
+      ES_NODE_DATA: "true"
+    labels:
+      org.qnib.skip-logs: "true"
+  kibana:
+    image: qnib/plain-kibana:6.0.1
+    healthcheck:
+      disable: true
+    ports:
+      - "5601:5601"
+    environment:
+        ES_MASTER_HOST: tasks.elasticsearch
+    labels:
+      org.qnib.skip-logs: "true"
+  qframe-logs:
+    image: qnib/qframe-logs:5ac7cfb14efa@sha256:6f5a1488ff19131f20cf3cd5cca409757c4688a4d84274af5d6d439bbdbddc98
+    environment:
+      - ELASTICSEARCH_HOST=tasks.elasticsearch
+      - INFLUXDB_HOST=tasks.influxdb
+      - INFLUXDB_DB=qframe
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      org.qnib.skip-logs: "true"
+  www:
+    image: nginx
+    ports:
+      - 8080:80
+    environment:
+      - LOG_CAPTURE_ENABLED=true
