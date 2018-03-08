@@ -57,7 +57,7 @@ services:
       - "9090:9090"
     environment:
         STORAGE_ADAPTER_HOST: tasks.prometheus-storage-adapter:9201
-        PROMETHEUS_STATIC_SCRAPE_LIST: dockerd:172.17.0.1:9323:/metrics,node:172.17.0.1:9100:/metrics
+        PROMETHEUS_STATIC_SCRAPE_LIST: dockerd:172.17.0.1:9323:/metrics,node1:192.168.99.100:9100:/metrics,node2:192.168.99.101:9100:/metrics,node3:192.168.99.102:9100:/metrics
         PROMETHEUS_DNS_SCRAPE_LIST: cadvisor:tasks.cadvisor:8080:/metrics
   prometheus-storage-adapter:
     image: qnib/plain-prometheus-remote-storage
