@@ -68,7 +68,7 @@ services:
           memory: 64M
 
   grafana:
-    image: qnib/swarmprom-grafana:2018-07-10_11-17
+    image: qnib/swarmprom-grafana:2018-07-10_17-38
     networks:
       - net
     environment:
