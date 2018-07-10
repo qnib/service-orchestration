@@ -1,0 +1,8 @@
+ALERT container_memory_usage_75p
+  IF (container_spec_memory_limit_bytes!=0) and (container_memory_usage_bytes / container_spec_memory_limit_bytes > 0.75)
+  FOR 10s
+  LABELS  { severity="warning" }
+  ANNOTATIONS {
+      summary = "Memory alert for Container '{{ $labels.name }}'",
+      description = "Container '{{ $labels.name }}' of service '{{ $labels.container_label_com_docker_swarm_service_name }}' is close to reach the memory-limit at {{ humanize $value }}%.",
+  }

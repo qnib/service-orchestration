@@ -1,0 +1,13 @@
+filebeat.inputs:
+#- type: log
+#  paths:
+#    - /var/log/messages
+#    - /var/log/*.log
+- type: docker
+  containers:
+    path: "/var/lib/docker/containers"
+    stream: "all"
+    ids:
+      - "*"
+output.elasticsearch:
+  hosts: ["tasks.elasticsearch:9200"]
