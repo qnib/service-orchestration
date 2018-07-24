@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   server:
-    image: qnib/alplain-gocd-server:17.10.0@sha256:f08ca8d31036d9a1e1ce2327fc606febfbbc011d5ab1db52f72b8be431d54ccf
+    image: qnib/alplain-gocd-server:18.1.0
     deploy:
       replicas: 1
       placement:
@@ -26,7 +26,7 @@ services:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
      - GOCD_AGENT_AUTOENABLE_KEY=qnibFTW
   agent:
-    image: qnib/alplain-gocd-agent:17.10.0@sha256:7b33ef377eb3c5628d50598b1802bbfc86c41d230d552ff25726407a27997760
+    image: qnib/alplain-gocd-agent:2018-07-14_20-05
     hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
     deploy:
       replicas: 1
@@ -35,6 +35,12 @@ services:
         delay: 5s
       restart_policy:
         condition: on-failure
+    secrets:
+      - source: gocd_ucp_moby
+        target: /opt/qnib/ucp/bundles/ucp-bundle-moby.zip
+        uid: '1000'
+        gid: '1000'
+        mode: 0440
     environment:
      - GO_SERVER_URL=https://tasks.server:8154/go
      - DOCKER_HOST=unix:///var/run/docker.sock
@@ -45,6 +51,8 @@ services:
 secrets:
   gocd_password_properties:
     file: ./gocd_password_properties
+  gocd_ucp_moby:
+    external: true
 configs:
   gocd_config_passwd:
     file: ./config/gocd-config.tar

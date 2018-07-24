@@ -3,7 +3,7 @@ services:
   slapd:
     image: qnib/plain-openldap-qnibinc@sha256:5d9316020781797628e3841dc794118cc9643c65c476fc3cf7aa7dcfe0700958
   server:
-    image: qnib/alplain-gocd-server:17.10.0@sha256:f08ca8d31036d9a1e1ce2327fc606febfbbc011d5ab1db52f72b8be431d54ccf
+    image: qnib/alplain-gocd-server:18.1.0
     deploy:
       replicas: 1
       placement:
@@ -22,7 +22,7 @@ services:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
      - GOCD_AGENT_AUTOENABLE_KEY=qnibFTW
   agent:
-    image: qnib/alplain-gocd-agent:17.10.0@sha256:7b33ef377eb3c5628d50598b1802bbfc86c41d230d552ff25726407a27997760
+    image: qnib/alplain-gocd-agent:2018-07-14_20-05
     hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
     deploy:
       replicas: 1
