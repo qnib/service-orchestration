@@ -1,7 +1,12 @@
-# GoCD Server/Agent using password-file
+# GoCD Server/Agent w/ OpenLDAP backend
 
-This `docker-compose.yml` provides a server/agent GoCD setup using `docker secret` to provide a `password.properties` file into the server.
+Deploy the stack via `docker-app`:
 
-## Additional GoCD stacks
-
-Within the `openldap` directory a stack can be find using an openldap service instead of the `password.properties` file.
+```
+$ docker-app deploy
+Creating network gocd_default
+Creating config gocd_gocd_config
+Creating service gocd_slapd
+Creating service gocd_server
+Creating service gocd_agent
+```
