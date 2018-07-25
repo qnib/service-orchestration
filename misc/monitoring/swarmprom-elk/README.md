@@ -15,5 +15,6 @@ $ docker node inspect -f '{{json .Spec.Labels}}' spksvt6g6puu2x11xy78t4txs |jq .
 ## Install
 
 ```bash
-$ docker stack deploy -c docker-compose.yml prelk
+$ docker-app deploy swarmprom
+$ docker-app deploy elk
 ```

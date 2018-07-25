@@ -1,9 +1,19 @@
-version: "3.3"
+---
+version: 0.1.0
+name: elk
+description: "Prometheus to monitor SWARM"
+maintainers:
+- name: Christian Kniep
+  email: christian@qnib.org
+targets:
+  swarm: true
+  kubernetes: false
 
+--
+version: '3.6'
 networks:
   net:
-    driver: overlay
-    attachable: true
+    name: swarmprom_net
 
 volumes:
     prometheus: {}
@@ -11,14 +21,8 @@ volumes:
     alertmanager: {}
 
 configs:
-  #nodename:
-  #  file: ./nodename
   prom_config:
     file: ./prometheus/conf/prometheus.yml
-  logstash_config:
-    file: ./logstash/logstash.conf
-  filebeat_config:
-    file: ./filebeat/filebeat.yml
   caddy_config:
     file: ./caddy/Caddyfile
   dockerd_config:
@@ -29,12 +33,10 @@ configs:
     file: ./prometheus/rules/swarm_task.rules
   service_rules:
     file: ./prometheus/rules/swarm_service.rules
-
 services:
   dockerd-exporter:
     image: stefanprodan/caddy
-    networks:
-      - net
+    networks: ["net"]
     environment:
       - DOCKER_GWBRIDGE_IP=172.18.0.1
     configs:
@@ -50,8 +52,7 @@ services:
 
   cadvisor:
     image: google/cadvisor
-    networks:
-      - net
+    networks: ["net"]
     command: -logtostderr -docker_only
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -69,19 +70,18 @@ services:
 
   grafana:
     image: qnib/swarmprom-grafana:2018-07-10_17-38
-    networks:
-      - net
+    networks: ["net"]
     environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${gf_admin_user}
+      - GF_SECURITY_ADMIN_PASSWORD=${gf_admin_passwd}
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL:-http://192.168.99.106}
-      - GF_SMTP_ENABLED=${GF_SMTP_ENABLED:-false}
-      - GF_SMTP_FROM_ADDRESS=${GF_SMTP_FROM_ADDRESS:-grafana@test.com}
-      - GF_SMTP_FROM_NAME=${GF_SMTP_FROM_NAME:-Grafana}
-      - GF_SMTP_HOST=${GF_SMTP_HOST:-smtp:25}
-      - GF_SMTP_USER=${GF_SMTP_USER}
-      - GF_SMTP_PASSWORD=${GF_SMTP_PASSWORD}
+      - GF_SERVER_ROOT_URL=${gf_server_root}
+      - GF_SMTP_ENABLED=${gf_smtp_enabled}
+      - GF_SMTP_FROM_ADDRESS=${gf_smtp_from_address}
+      - GF_SMTP_FROM_NAME=${gf_smtp_from_name}
+      - GF_SMTP_HOST=${gf_smtp_host}
+      - GF_SMTP_USER=${gf_smtp_user}
+      - GF_SMTP_PASSWORD=${gf_smtp_passwd}
     volumes:
       - grafana:/var/lib/grafana
     deploy:
@@ -98,12 +98,11 @@ services:
 
   alertmanager:
     image: qnib/swarmprom-alertmanager
-    networks:
-      - net
+    networks: ["net"]
     environment:
-      - SLACK_URL=${SLACK_URL:-https://hooks.slack.com/services/TOKEN}
-      - SLACK_CHANNEL=${SLACK_CHANNEL:-general}
-      - SLACK_USER=${SLACK_USER:-alertmanager}
+      - SLACK_URL=${alertmanager_slack_url}
+      - SLACK_CHANNEL=${alertmanager_slack_channel}
+      - SLACK_USER=${alertmanager_slack_user}
     command:
       - '-config.file=/etc/alertmanager/alertmanager.yml'
       - '-storage.path=/alertmanager'
@@ -123,8 +122,7 @@ services:
 
   unsee:
     image: cloudflare/unsee:v0.8.0
-    networks:
-      - net
+    networks: ["net"]
     deploy:
       mode: replicated
       replicas: 1
@@ -144,8 +142,7 @@ services:
 
   node-exporter:
     image: qnib/swarmprom-node-exporter
-    networks:
-      - net
+    networks: ["net"]
     environment:
       - NODE_ID={{.Node.ID}}
     volumes:
@@ -153,10 +150,6 @@ services:
       - /sys:/host/sys:ro
       - /:/rootfs:ro
       - /etc/hostname:/etc/nodename
-    ### In case docker-for-mac is used, /etc/hostname is not present in the linuxkit VM
-    #configs:
-    #   - source: nodename
-    #     target: /etc/nodename
     command:
       - '-collector.textfile.directory=/etc/node-exporter/'
       - '-collector.procfs=/host/proc'
@@ -173,8 +166,7 @@ services:
 
   prometheus:
     image: qnib/plain-prometheus:2.3.1
-    networks:
-      - net
+    networks: ["net"]
     command:
       #- 'tail -f /dev/null'
       - '/opt/prometheus/prometheus'
@@ -206,13 +198,12 @@ services:
 
   caddy:
     image: stefanprodan/caddy
+    networks: ["net"]
     ports:
       - "3000:3000"
       - "9090:9090"
       - "9093:9093"
       - "9094:9094"
-    networks:
-      - net
     environment:
       - ADMIN_USER=${ADMIN_USER:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
@@ -238,8 +229,7 @@ services:
 
   gpu-exporter:
     image: qnib/pgme:ubuntu
-    networks:
-      - net
+    networks: ["net"]
     deploy:
       mode: global
       placement:
@@ -249,63 +239,16 @@ services:
       - HOUDINI_ENABLED=true
       - HOUDINI_GPU_ENABLED=true
 
-  elasticsearch:
-    image: qnib/plain-elasticsearch:6.0.1
-    networks:
-      - net
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    environment:
-      ES_HEAP_MAX: "512m"
-      ES_HEAP_MIN: "512m"
-      ES_NODE_MASTER: "true"
-      ES_NODE_DATA: "true"
-
-  kibana:
-    image: qnib/plain-kibana:6.0.1
-    networks:
-      - net
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-    healthcheck:
-      disable: true
-    ports:
-      - "5601:5601"
-    environment:
-        ES_MASTER_HOST: tasks.elasticsearch
-
-  logstash:
-    image: qnib/plain-logstash:2018-07-10_13-31
-    networks: ["net"]
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-    ports:
-      - 12201:12201/udp
-    configs:
-      - source: logstash_config
-        target: /opt/qnib/logstash/etc/logstash.conf
-
-  #filebeat:
-  #  image: docker.elastic.co/beats/filebeat:6.3.1
-  #  networks: ["net"]
-  #  configs:
-  #    - source: filebeat_config
-  #      target: /usr/share/filebeat/filebeat.yml
-  #  volumes:
-  #    - /var/lib/docker/containers:/var/lib/docker/containers
-      #- /var/log:/var/log:ro
+--
+alertmanager_slack_channel: alert
+alertmanager_slack_url: https://hooks.slack.com/services/TOKEN
+alertmanager_slack_user: alert
+gf_admin_user: admin
+gf_admin_passwd: admin
+gf_server_root: http://localhost:3000
+gf_smtp_enabled: false
+gf_smtp_from_address: grafana@localhost.com
+gf_smtp_from_name: Grafana
+gf_smtp_host: localhost:25
+gf_smtp_user: root
+gf_smtp_passwd: root

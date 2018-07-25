@@ -1,0 +1,77 @@
+---
+version: 0.1.0
+name: elk
+description: "Elasticsearch/Logstash/Kibana"
+maintainers:
+- name: Christian Kniep
+  email: christian@qnib.org
+targets:
+  swarm: true
+  kubernetes: false
+
+---
+version: '3.6'
+networks:
+  net:
+    external: true
+    name: swarmprom_net
+configs:
+  logstash_config:
+    file: ./logstash/logstash.conf
+services:
+  elasticsearch:
+    image: qnib/plain-elasticsearch:${elasticsearch_img_tag}
+    networks:
+      - net
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_HEAP_MAX: "512m"
+      ES_HEAP_MIN: "512m"
+      ES_NODE_MASTER: "true"
+      ES_NODE_DATA: "true"
+
+  kibana:
+    image: qnib/plain-kibana:${kibana_img_tag}
+    networks:
+      - net
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    healthcheck:
+      disable: true
+    ports:
+      - "${kibana_ext_port}:5601"
+    environment:
+        ES_MASTER_HOST: tasks.elasticsearch
+
+  logstash:
+    image: qnib/plain-logstash:${logstash_img_tag}
+    networks: ["net"]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+      - ${logstash_gelf_ext_port}:12201/udp
+    configs:
+      - source: logstash_config
+        target: /opt/qnib/logstash/etc/logstash.conf
+---
+elasticsearch_img_tag: 5.5.1
+logstash_img_tag: 6.3.1
+logstash_gelf_ext_port: 12201
+kibana_img_tag: 6.3.1
+kibana_ext_port: 5601
