@@ -10,3 +10,5 @@ Creating service gocd_slapd
 Creating service gocd_server
 Creating service gocd_agent
 ```
+
+The same can be done using the pushed stack: `docker-app render qnib/gocd.dockerapp:0.1.0`
