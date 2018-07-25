@@ -1,0 +1,79 @@
+---
+version: 0.1.0
+name: gocd
+description: "CI/CD pipeline via GoCD using one agent"
+maintainers:
+- name: Christian Kniep
+  email: christian@qnib.org
+targets:
+  swarm: true
+  kubernetes: false
+
+---
+version: '3.6'
+services:
+  slapd:
+    image: qnib/plain-openldap-qnibinc@sha256:5d9316020781797628e3841dc794118cc9643c65c476fc3cf7aa7dcfe0700958
+    deploy:
+      replicas: 0
+      placement:
+        constraints:
+          - node.role == manager
+  server:
+    image: qnib/alplain-gocd-server:${gocd_server_img_tag}
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+     - ${gocd_server_http_port}:8153
+     - ${gocd_server_https_port}:8154
+    configs:
+      - source: gocd_config
+        target: /opt/qnib/gocd/gocd-config.tar
+        uid: '0'
+        gid: '0'
+        mode: 0400
+    environment:
+     - GOCD_SERVER_CLEAN_WORKSPACE=false
+     - GOCD_AGENT_AUTOENABLE_KEY=${gocd_autoenable_key}
+  agent:
+    image: qnib/alplain-gocd-agent:${gocd_agent_img_tag}
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
+    deploy:
+      replicas: ${gocd_agent_replicas}
+      update_config:
+        parallelism: 1
+        delay: 5s
+      restart_policy:
+        condition: on-failure
+    # TODO: Should be optional... (if ${use_ucp} {)
+    #secrets:
+    #  - source: gocd_ucp_moby
+    #    target: /opt/qnib/ucp/bundles/ucp-bundle-moby.zip
+    #    uid: '1000'
+    #    gid: '1000'
+    #    mode: 0440
+    environment:
+     - GO_SERVER_URL=https://tasks.server:8154/go
+     - DOCKER_HOST=unix:///var/run/docker.sock
+     - GOCD_AGENT_AUTOENABLE_KEY=${gocd_autoenable_key}
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+
+secrets:
+  gocd_ucp_moby:
+    external: true
+configs:
+  gocd_config:
+    file: ${gocd_server_config}
+
+---
+gocd_agent_replicas: 1
+gocd_agent_img_tag: 18.7.0
+gocd_server_img_tag: 18.7.0
+gocd_server_https_port: 8154
+gocd_server_http_port: 8153
+gocd_autoenable_key: qnibFTW
+gocd_server_config: ./config/gocd-config-openldap.tar
