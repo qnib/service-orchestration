@@ -5,19 +5,25 @@ Different kafka versions can be started using the subdirectoryies.
 
 ## Start the Support Stack
 
+
+
 ```bash
-$ docker stack deploy --compose-file docker-compose.yml kafka
+$ docker-app deploy
 Creating network kafka_default
-Creating service kafka_zkui
-Creating service kafka_kafka-manager
 Creating service kafka_zookeeper
-$ docker service ls -f label=com.docker.stack.namespace=kafka
+Creating service kafka_zkui
+Creating service kafka_broker
+Creating service kafka_manager
+$ sleep 60 ; docker service ls -f label=com.docker.stack.namespace=kafka
 ID                  NAME                  MODE                REPLICAS            IMAGE                               PORTS
-2ysqrm0q5z0g        kafka_zkui            replicated          1/1                 qnib/plain-zkui:8d3441d             *:9090->9090/tcp
-f1p8yoo4slvt        kafka_zookeeper       replicated          1/1                 qnib/plain-zookeeper:3.4.10         *:2181->2181/tcp
-qo8hg3hhv5zp        kafka_kafka-manager   replicated          1/1                 qnib/plain-kafka-manager:1.3.3.13   *:9001->9000/tcp
+z1wozetio2zn        kafka_broker        replicated          3/3                 qnib/plain-kafka:1.1.1
+1eiti1961vfc        kafka_manager       replicated          1/1                 qnib/plain-kafka-manager:1.3.3.18   *:9000->9000/tcp
+khcykv3zqyj5        kafka_zkui          replicated          1/1                 qnib/plain-zkui:8d3441d             *:9090->9090/tcp
+tfiq5uvmot4f        kafka_zookeeper     replicated          1/1                 qnib/plain-zookeeper:2018-04-25
 $
 ```
+
+
 ## Start the metrics stack
 
 ```bash
@@ -36,13 +42,4 @@ mda7aqyhxg6j        kafka_grafana           replicated          1/1             
 qo8hg3hhv5zp        kafka_kafka-manager     replicated          1/1                 qnib/plain-kafka-manager:1.3.3.13              *:9001->9000/tcp
 rcnlws7seo4m        kafka_prometheus        replicated          1/1                 qnib/plain-prometheus:1.7.1-4                  *:9091->9090/tcp
 $
-```
-
-## Start kafka broker
-
-The subdirectories provide different versions of kafka, assuming that the network used by the support stack is called `kafka_default`.
-
-```bash
-$ docker stack deploy --compose-file alpine-0.10.2.1/docker-compose.yml kafka
-Creating service kafka_broker
 ```

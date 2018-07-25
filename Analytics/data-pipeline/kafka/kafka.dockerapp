@@ -1,0 +1,46 @@
+---
+version: 0.1.0
+name: kafka
+description: "Kafka stack for development purposes (downscaling impossible)"
+maintainers:
+- name: Christian Kniep
+  email: christian@qnib.org
+targets:
+  swarm: true
+  kubernetes: false
+
+---
+
+version: '3'
+services:
+  zookeeper:
+    image: qnib/${zk_img_name}:${zk_img_tag}
+  zkui:
+    image: qnib/plain-zkui:${zkui_img_tag}
+    ports:
+      - "${zkui_port}:9090"
+  broker:
+    image: qnib/${kafka_img_name}:${kafka_img_tag}
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
+    deploy:
+      replicas: 3
+    environment:
+      - KAFKA_BROKER_ID={{.Task.Slot}}
+      - LOG_MESSAGE_FORMAT_VERSION=${kafka_log_msg_format}
+  manager:
+    image: qnib/plain-kafka-manager:${kmanager_img_tag}
+    ports:
+      - "${kmanager_port}:9000"
+    environment:
+      ZOOKEEPER_HOSTS: "tasks.zookeeper:2181"
+
+---
+zk_img_name: plain-zookeeper
+zk_img_tag: 2018-04-25
+kafka_img_name: plain-kafka
+kafka_img_tag: 1.1.1
+kafka_log_msg_format: 1.0-IV0
+zkui_img_tag: 8d3441d
+zkui_port: 9090
+kmanager_img_tag: 1.3.3.18
+kmanager_port: 9000
