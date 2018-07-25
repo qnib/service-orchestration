@@ -1,5 +1,5 @@
 ---
-version: 0.1.0
+version: 0.1.1
 name: kafka
 description: "Kafka stack for development purposes (downscaling impossible)"
 maintainers:
