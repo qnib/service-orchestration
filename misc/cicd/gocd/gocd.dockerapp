@@ -12,6 +12,7 @@ targets:
 ---
 version: '3.6'
 services:
+  {{if .ldap.enabled}}
   slapd:
     image: qnib/plain-openldap-qnibinc@sha256:5d9316020781797628e3841dc794118cc9643c65c476fc3cf7aa7dcfe0700958
     deploy:
@@ -19,16 +20,17 @@ services:
       placement:
         constraints:
           - node.role == manager
+  {{end}}
   server:
-    image: qnib/alplain-gocd-server:${gocd_server_img_tag}
+    image: qnib/alplain-gocd-server:${gocd.server.img-tag}
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.role == manager
     ports:
-     - ${gocd_server_http_port}:8153
-     - ${gocd_server_https_port}:8154
+     - ${gocd.server.http-port}:8153
+     - ${gocd.server.https-port}:8154
     configs:
       - source: gocd_config
         target: /opt/qnib/gocd/gocd-config.tar
@@ -37,28 +39,20 @@ services:
         mode: 0400
     environment:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
-     - GOCD_AGENT_AUTOENABLE_KEY=${gocd_autoenable_key}
+     - GOCD_AGENT_AUTOENABLE_KEY=${gocd.autoenable-key}
   agent:
-    image: qnib/alplain-gocd-agent:${gocd_agent_img_tag}
-    hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
+    image: qnib/alplain-gocd-agent:${gocd.agent.img-tag}
     deploy:
-      replicas: ${gocd_agent_replicas}
+      replicas: ${gocd.agent.replicas}
       update_config:
         parallelism: 1
         delay: 5s
       restart_policy:
         condition: on-failure
-    # TODO: Should be optional... (if ${use_ucp} {)
-    #secrets:
-    #  - source: gocd_ucp_moby
-    #    target: /opt/qnib/ucp/bundles/ucp-bundle-moby.zip
-    #    uid: '1000'
-    #    gid: '1000'
-    #    mode: 0440
     environment:
      - GO_SERVER_URL=https://tasks.server:8154/go
      - DOCKER_HOST=unix:///var/run/docker.sock
-     - GOCD_AGENT_AUTOENABLE_KEY=${gocd_autoenable_key}
+     - GOCD_AGENT_AUTOENABLE_KEY=${gocd.autoenable-key}
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock
 
@@ -67,13 +61,26 @@ secrets:
     external: true
 configs:
   gocd_config:
-    file: ${gocd_server_config}
+    {{if .ldap.enabled}}
+    file: ${gocd.server.config.ldap}
+    {{else}}
+    file: ${gocd.server.config.default}
+    {{end}}
 
 ---
-gocd_agent_replicas: 1
-gocd_agent_img_tag: 18.7.0
-gocd_server_img_tag: 18.7.0
-gocd_server_https_port: 8154
-gocd_server_http_port: 8153
-gocd_autoenable_key: qnibFTW
-gocd_server_config: ./config/gocd-config-openldap.tar
+ldap:
+  enabled: true
+ucp:
+  enabled: true
+gocd:
+  agent:
+    replicas: 1
+    img-tag: 18.7.0
+  server:
+    img-tag: 18.7.0
+    https-port: 8154
+    http-port: 8153
+    config:
+      default: ./config/gocd-config.tar
+      ldap: ./config/gocd-config-openldap.tar
+  autoenable-key: qnibFTW
