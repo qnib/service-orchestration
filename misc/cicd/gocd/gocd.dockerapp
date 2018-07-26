@@ -37,6 +37,14 @@ services:
         uid: '0'
         gid: '0'
         mode: 0400
+        configs:
+      {{if not .ldap.enabled}}
+      - source: gocd_config_passwd
+        target: /opt/qnib/gocd/gocd-config.tar
+        uid: '0'
+        gid: '0'
+        mode: 0400
+      {{end}}
     environment:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
      - GOCD_AGENT_AUTOENABLE_KEY=${gocd.autoenable-key}
@@ -49,6 +57,14 @@ services:
         delay: 5s
       restart_policy:
         condition: on-failure
+    {{if .ucp.enabled}}
+    secrets:
+      - source: gocd_ucp_moby
+        target: /opt/qnib/ucp/bundles/ucp-bundle-moby.zip
+        uid: '1000'
+        gid: '1000'
+        mode: 0440
+    {{end}}
     environment:
      - GO_SERVER_URL=https://tasks.server:8154/go
      - DOCKER_HOST=unix:///var/run/docker.sock
@@ -67,11 +83,18 @@ configs:
     file: ${gocd.server.config.default}
     {{end}}
 
+secrets:
+  gocd_password_properties:
+    file: ./gocd_password_properties
+  {{if .ucp.enabled}}
+  gocd_ucp_moby:
+    external: true
+  {{end}}
 ---
 ldap:
-  enabled: true
+  enabled: false
 ucp:
-  enabled: true
+  enabled: false
 gocd:
   agent:
     replicas: 1
