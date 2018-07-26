@@ -1,5 +1,5 @@
 ---
-version: 0.2.0
+version: 0.2.1
 name: gocd
 description: "CI/CD pipeline via GoCD using one agent"
 maintainers:
@@ -38,13 +38,14 @@ services:
         gid: '0'
         mode: 0400
         configs:
-      {{if not .ldap.enabled}}
-      - source: gocd_config_passwd
-        target: /opt/qnib/gocd/gocd-config.tar
-        uid: '0'
-        gid: '0'
-        mode: 0400
-      {{end}}
+    {{if not .ldap.enabled}}
+    secrets:
+      - source: gocd_password_properties
+        target: /etc/go/password.properties
+        uid: '1000'
+        gid: '1000'
+        mode: 0440
+    {{end}}
     environment:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
      - GOCD_AGENT_AUTOENABLE_KEY=${gocd.autoenable-key}
@@ -84,12 +85,13 @@ configs:
     {{end}}
 
 secrets:
+  {{if not .ldap.enabled}}
   gocd_password_properties:
     file: ./gocd_password_properties
-  {{if .ucp.enabled}}
+  {{end}}
   gocd_ucp_moby:
     external: true
-  {{end}}
+
 ---
 ldap:
   enabled: false
