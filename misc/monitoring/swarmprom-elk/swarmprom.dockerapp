@@ -1,5 +1,5 @@
 ---
-version: 0.1.0
+version: 0.1.1
 name: elk
 description: "Prometheus to monitor SWARM"
 maintainers:
@@ -9,7 +9,7 @@ targets:
   swarm: true
   kubernetes: false
 
---
+---
 version: '3.6'
 networks:
   net:
@@ -72,16 +72,16 @@ services:
     image: qnib/swarmprom-grafana:2018-07-10_17-38
     networks: ["net"]
     environment:
-      - GF_SECURITY_ADMIN_USER=${gf_admin_user}
-      - GF_SECURITY_ADMIN_PASSWORD=${gf_admin_passwd}
+      - GF_SECURITY_ADMIN_USER=${gf.admin.user}
+      - GF_SECURITY_ADMIN_PASSWORD=${gf.admin.passwd}
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_ROOT_URL=${gf_server_root}
-      - GF_SMTP_ENABLED=${gf_smtp_enabled}
-      - GF_SMTP_FROM_ADDRESS=${gf_smtp_from_address}
-      - GF_SMTP_FROM_NAME=${gf_smtp_from_name}
-      - GF_SMTP_HOST=${gf_smtp_host}
-      - GF_SMTP_USER=${gf_smtp_user}
-      - GF_SMTP_PASSWORD=${gf_smtp_passwd}
+      - GF_SERVER_ROOT_URL=${gf.server.root}:3000
+      - GF_SMTP_ENABLED=${gf.smtp.enabled}
+      - GF_SMTP_FROM_ADDRESS=${gf.smtp.from.address}
+      - GF_SMTP_FROM_NAME=${gf.smtp.from.name}
+      - GF_SMTP_HOST=${gf.smtp.host}
+      - GF_SMTP_USER=${gf.smtp.user}
+      - GF_SMTP_PASSWORD=${gf.smtp.passwd}
     volumes:
       - grafana:/var/lib/grafana
     deploy:
@@ -100,9 +100,9 @@ services:
     image: qnib/swarmprom-alertmanager
     networks: ["net"]
     environment:
-      - SLACK_URL=${alertmanager_slack_url}
-      - SLACK_CHANNEL=${alertmanager_slack_channel}
-      - SLACK_USER=${alertmanager_slack_user}
+      - SLACK_URL=${alertmanager.slack.url}/${alertmanager.slack.token}
+      - SLACK_CHANNEL=${alertmanager.slack.channel}
+      - SLACK_USER=${alertmanager.slack.user}
     command:
       - '-config.file=/etc/alertmanager/alertmanager.yml'
       - '-storage.path=/alertmanager'
@@ -167,8 +167,9 @@ services:
   prometheus:
     image: qnib/plain-prometheus:2.3.1
     networks: ["net"]
+    environment:
+      - PROMETHEUS_STATIC_SCRAPE_LIST=${prometheus.static_scrape_list}
     command:
-      #- 'tail -f /dev/null'
       - '/opt/prometheus/prometheus'
       - '--config.file=/etc/prometheus.yml'
       - '--storage.tsdb.path=/data/prometheus'
@@ -200,13 +201,14 @@ services:
     image: stefanprodan/caddy
     networks: ["net"]
     ports:
-      - "3000:3000"
+      - "8080:8080"
+      - "9300:9300"
       - "9090:9090"
       - "9093:9093"
       - "9094:9094"
     environment:
-      - ADMIN_USER=${ADMIN_USER:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - ADMIN_USER=${caddy.user}
+      - ADMIN_PASSWORD=${caddy.password}
     configs:
       - source: caddy_config
         target: /etc/caddy/Caddyfile
@@ -222,7 +224,7 @@ services:
         reservations:
           memory: 64M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 5s
       timeout: 1s
       retries: 5
@@ -239,16 +241,31 @@ services:
       - HOUDINI_ENABLED=true
       - HOUDINI_GPU_ENABLED=true
 
---
-alertmanager_slack_channel: alert
-alertmanager_slack_url: https://hooks.slack.com/services/TOKEN
-alertmanager_slack_user: alert
-gf_admin_user: admin
-gf_admin_passwd: admin
-gf_server_root: http://localhost:3000
-gf_smtp_enabled: false
-gf_smtp_from_address: grafana@localhost.com
-gf_smtp_from_name: Grafana
-gf_smtp_host: localhost:25
-gf_smtp_user: root
-gf_smtp_passwd: root
+---
+alertmanager:
+  slack:
+    channel: alert
+    token:
+    url: https://hooks.slack.com/services
+    user: alert
+caddy:
+  user: admin
+  password: caddyadmin
+gf:
+  admin:
+    user: admin
+    passwd: admin
+  server:
+    root: http://localhost
+    # part of the Caddyfile, needs to be configurable
+    port: 9300
+  smtp:
+    enabled: false
+    from:
+      address: grafana@localhost.com
+      name: Grafana
+    host: localhost:25
+    user: root
+    passwd: root
+prometheus:
+  static_scrape_list: ""

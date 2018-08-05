@@ -20,7 +20,7 @@ configs:
     file: ./logstash/logstash.conf
 services:
   elasticsearch:
-    image: qnib/plain-elasticsearch:${elasticsearch_img_tag}
+    image: qnib/plain-elasticsearch:${elasticsearch.image.tag}
     networks:
       - net
     deploy:
@@ -31,7 +31,6 @@ services:
           - node.role == manager
     ports:
       - "9200:9200"
-      - "9300:9300"
     environment:
       ES_HEAP_MAX: "512m"
       ES_HEAP_MIN: "512m"
@@ -39,7 +38,7 @@ services:
       ES_NODE_DATA: "true"
 
   kibana:
-    image: qnib/plain-kibana:${kibana_img_tag}
+    image: qnib/plain-kibana:${kibana.image.tag}
     networks:
       - net
     deploy:
@@ -51,12 +50,12 @@ services:
     healthcheck:
       disable: true
     ports:
-      - "${kibana_ext_port}:5601"
+      - "${kibana.port}:5601"
     environment:
         ES_MASTER_HOST: tasks.elasticsearch
 
   logstash:
-    image: qnib/plain-logstash:${logstash_img_tag}
+    image: qnib/plain-logstash:${logstash.image.tag}
     networks: ["net"]
     deploy:
       mode: replicated
@@ -65,13 +64,21 @@ services:
         constraints:
           - node.role == manager
     ports:
-      - ${logstash_gelf_ext_port}:12201/udp
+      - ${logstash.ports.gelf}:12201/udp
     configs:
       - source: logstash_config
         target: /opt/qnib/logstash/etc/logstash.conf
 ---
-elasticsearch_img_tag: 5.5.1
-logstash_img_tag: 6.3.1
-logstash_gelf_ext_port: 12201
-kibana_img_tag: 6.3.1
-kibana_ext_port: 5601
+elasticsearch:
+  image:
+    tag: 5.5.1
+logstash:
+  ports:
+    gelf: 12201
+  image:
+    tag: 6.3.1
+
+kibana:
+  image:
+    tag: 6.3.1
+  port: 5601
