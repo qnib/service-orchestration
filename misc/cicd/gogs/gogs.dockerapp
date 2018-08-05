@@ -1,0 +1,28 @@
+---
+version: 0.1.0
+name: gogs
+description: "A painless self-hosted Git service."
+maintainers:
+- name: Christian Kniep
+  email: christian@qnib.org
+targets:
+  swarm: true
+  kubernetes: false
+
+---
+
+version: '3.6'
+services:
+  www:
+    image: gogs/gogs
+    volumes: 
+      - /data
+    ports:
+      - ${server.ports.http}:3000 
+      - ${server.ports.ssh}:22 
+
+---
+server:
+  ports:
+    http: 3000
+    ssh: 10022
