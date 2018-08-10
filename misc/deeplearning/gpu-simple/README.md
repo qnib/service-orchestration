@@ -49,3 +49,47 @@ Of course the engine is not the ideal place for this decision. The Orchestrator 
 Just as an experiment, in case one does not have the liberty of changing the orchestrator.
 
 Kubernetes provides a devices plugin which might just works fine in case the runtime supports `NVIDIA_VISIBLE_DEVICES` support.
+
+## Deployement
+To select nodes with houdini installed, the nodes are labeled.
+```
+$ kubectl label nodes <gpu_node> houdini.gpu=true
+```
+
+Afterwards the trainer, jump-pod and services are created.
+```
+$ kubectl apply -f .
+pod "trainer" created
+service "simulator" created
+service "trainer" created
+$ kubectl apply -f misc/jumpod.yml
+pod "jumpod" created
+```
+
+### Kubernetes 1.8
+Currently DockerEE2.0 comes with kubernetes 1.8.x - thus, without StatefulSet.
+
+```
+$ kubectl apply -f 1.8/rc-simulator.yml
+replicationcontroller "simulator" created
+```
+
+### Kubernetes >=1.10
+With stable hostnames, StatefulSet are much more fun.
+
+```
+$ kubectl apply -f 1.10/sset-simulator.yml
+```
+
+## Query gpus
+
+```
+$ kubectl exec jumpod -c shell -i -t -- curl simulator.default.svc.cluster.local:9991/gpus
+policy: NVIDIA_VISIBLE_DEVICES=all,HOUDINI_GPU_ENABLED=true
+GPU 0: Tesla M60 (UUID: GPU-b85326fc-f486-6b57-87c3-86f035201a5d)
+GPU 1: Tesla M60 (UUID: GPU-53f8f4ce-1c4e-035a-98a8-ca7a769d5489)
+$ kubectl exec jumpod -c shell -i -t -- curl simulator.default.svc.cluster.local:9992/gpus
+sim: NVIDIA_VISIBLE_DEVICES=all,HOUDINI_GPU_ENABLED=true
+GPU 0: Tesla M60 (UUID: GPU-b85326fc-f486-6b57-87c3-86f035201a5d)
+GPU 1: Tesla M60 (UUID: GPU-53f8f4ce-1c4e-035a-98a8-ca7a769d5489)
+```

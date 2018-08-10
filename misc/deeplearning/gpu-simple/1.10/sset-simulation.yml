@@ -5,13 +5,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: simulation # has to match .spec.template.metadata.labels
-  serviceName: "simulation"
+      app: simulator # has to match .spec.template.metadata.labels
+  serviceName: "simulator"
   replicas: 3 # by default is 1
   template:
     metadata:
       labels:
-        app: simulation # has to match .spec.selector.matchLabels
+        app: simulator # has to match .spec.selector.matchLabels
     spec:
       containers:
       - name: policy

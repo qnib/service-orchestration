@@ -5,9 +5,11 @@ metadata:
   labels:
     app: trainer
 spec:
+  nodeSelector:
+    kubernetes.io/hostname: christiankniep-testkit-4f985c-ubuntu-0
   containers:
   - name: trainer
-    image: qnib/uplain-webtest-houdini:v0.1.5
+    image: qnib/uplain-webtest-houdini:v0.1.6
     env:
     - name: HTTP_PORT
       value: "9993"

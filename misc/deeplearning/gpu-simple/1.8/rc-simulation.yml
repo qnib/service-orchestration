@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: simulator
+spec:
+  replicas: 1
+  selector:
+    app: simulator
+  template:
+    metadata:
+      labels:
+        app: simulator # has to match .spec.selector.matchLabels
+    spec:
+      nodeSelector:
+        houdini.gpu: "true"
+      containers:
+      - name: policy
+        image: qnib/uplain-webtest-houdini:v0.1.6
+        ports:
+        - containerPort: 9991
+          name: policy
+        env:
+        - name: HTTP_PORT
+          value: "9991"
+        - name: CONTAINER_NAME
+          value: "policy"
+        - name: HOUDINI_GPU_ENABLED
+          value: "true"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      - name: sim
+        image: qnib/uplain-webtest-houdini:v0.1.6
+        ports:
+        - containerPort: 9992
+          name: sim
+        env:
+        - name: HTTP_PORT
+          value: "9992"
+        - name: CONTAINER_NAME
+          value: "sim"
+        - name: HOUDINI_GPU_ENABLED
+          value: "true"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
