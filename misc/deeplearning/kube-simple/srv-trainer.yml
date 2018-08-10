@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: trainer
+spec:
+  ports:
+    - port: 9993
+      targetPort: 9993
+      name: trainer
+  selector:
+    app: trainer
