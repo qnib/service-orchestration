@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: policy
+spec:
+  selector:
+    matchLabels:
+      app: simulation # has to match .spec.template.metadata.labels
+  serviceName: "simulation"
+  replicas: 3 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: simulation # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: policy
+        image: qnib/uplain-webtest-houdini:v0.1.5
+        ports:
+        - containerPort: 9991
+          name: policy
+        env:
+        - name: HTTP_PORT
+          value: "9991"
+        - name: CONTAINER_NAME
+          value: "policy"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      - name: sim
+        image: qnib/uplain-webtest-houdini:v0.1.5
+        ports:
+        - containerPort: 9992
+          name: sim
+        env:
+        - name: HTTP_PORT
+          value: "9992"
+        - name: CONTAINER_NAME
+          value: "sim"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name

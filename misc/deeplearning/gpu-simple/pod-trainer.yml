@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: trainer
+  labels:
+    app: trainer
+spec:
+  containers:
+  - name: trainer
+    image: qnib/uplain-webtest-houdini:v0.1.5
+    env:
+    - name: HTTP_PORT
+      value: "9993"
+    - name: CONTAINER_NAME
+      value: "trainer"
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
