@@ -24,8 +24,6 @@ spec:
           value: "9991"
         - name: CONTAINER_NAME
           value: "policy"
-        - name: HOUDINI_GPU_ENABLED
-          value: "true"
         - name: POD_NAME
           valueFrom:
             fieldRef:
@@ -40,8 +38,6 @@ spec:
           value: "9992"
         - name: CONTAINER_NAME
           value: "sim"
-        - name: HOUDINI_GPU_ENABLED
-          value: "true"
         - name: POD_NAME
           valueFrom:
             fieldRef:
