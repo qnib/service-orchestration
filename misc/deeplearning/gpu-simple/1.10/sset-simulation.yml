@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: policy
-        image: qnib/uplain-webtest-houdini:v0.1.5
+        image: qnib/uplain-webtest-houdini:v0.2.1
         ports:
         - containerPort: 9991
           name: policy
@@ -29,7 +29,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
       - name: sim
-        image: qnib/uplain-webtest-houdini:v0.1.5
+        image: qnib/uplain-webtest-houdini:v0.2.1
         ports:
         - containerPort: 9992
           name: sim
