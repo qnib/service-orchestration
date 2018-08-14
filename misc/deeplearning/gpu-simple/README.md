@@ -44,9 +44,6 @@ $ nvidia-smi -L
 GPU 0: GRID K520 (UUID: GPU-7802b7ad-aabe-2cf5-a871-90d966b79122)
 ```
 
-
-
-
 ### TL;DR HOUDINI_GPU_REQUESTED
 
 Using `HOUDINI_GPU_REQUESTED` allows for multi-workload use of multi-GPU setups without coordination of who is using which GPU at a given point in time.
