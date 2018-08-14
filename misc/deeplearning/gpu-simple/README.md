@@ -26,6 +26,11 @@ The goal is to attach GPUs according to ENV Variables, so that a DL framework ca
 
 The problem is that in case multiple stacks are deployed, each container tasks needs to know where it is scheduled.
 
+Assuming each of the tasks should use one GPU exclusively, this can only be achieved by pining the NVIDIA_VISIBLE_DEVICES carefully.
+A better approach, would ask the Engine to provide a certain amount of GPUs. If the engine is out of GPUs it should just drop the task, which would reschedule.
+
+- `HOUDINI_GPU_REQUEST` will request an amount of GPUs from the engine, which will be used exclusivly.
+
 Given two workers:
 *g3.8xlarge*
 ```
@@ -39,10 +44,36 @@ $ nvidia-smi -L
 GPU 0: GRID K520 (UUID: GPU-7802b7ad-aabe-2cf5-a871-90d966b79122)
 ```
 
-Assuming each of the tasks should use one GPU exclusively, this can only be achieved by pining the NVIDIA_VISIBLE_DEVICES carefully.
-A better approach, would ask the Engine to provide a certain amount of GPUs. If the engine is out of GPUs it should just drop the task, which would reschedule.
 
-- [ ] `HOUDINI_GPU_REQUEST` will request an amount of GPUs from the engine, which will be used exclusivly.
+
+
+### TL;DR HOUDINI_GPU_REQUESTED
+
+Using `HOUDINI_GPU_REQUESTED` allows for multi-workload use of multi-GPU setups without coordination of who is using which GPU at a given point in time.
+
+The above stack is deployed in two distinct kubernetes namespaces (`gpu1` and `gpu2`), which allows to developers to use the same stack without interfering each other. Each trainer requesting one GPU.
+
+```
+Found reservation for 'k8s_trainer_trainer_gpu1_b9756c65-9efa-11e8-af47-0242ac110010_0'"
+Found reservation for 'k8s_trainer_trainer_gpu2_31fde940-9efc-11e8-af47-0242ac110010_0'"
+```
+
+By querying the simulation callback to reach out to the trainer, the distinct IDs of the GPUs are shown.
+
+```
+$ kubectl exec jumpod -c shell -i -t -- curl -X POST -H "Content-Type: application/json" \
+                     -d '{"port":"9993", "path":"/gpus","host":"trainer.gpu2.svc.cluster.local"}' \
+                     simulator.gpu2.svc.cluster.local:9991/callmeback
+>>> Callback http://trainer.gpu2.svc.cluster.local:9993/gpus
+trainer: HOUDINI_GPU_REQUESTED=1
+GPU 0: Tesla M60 (UUID: GPU-53f8f4ce-1c4e-035a-98a8-ca7a769d5489)
+$ kubectl exec -n gpu1 jumpod -c shell -i -t -- curl -X POST -H "Content-Type: application/json" \
+                     -d '{"port":"9993", "path":"/gpus","host":"trainer.gpu1.svc.cluster.local"}' \
+                     simulator.gpu1.svc.cluster.local:9991/callmeback
+>>> Callback http://trainer.gpu1.svc.cluster.local:9993/gpus
+trainer: HOUDINI_GPU_REQUESTED=1
+GPU 0: Tesla M60 (UUID: GPU-b85326fc-f486-6b57-87c3-86f035201a5d)
+```
 
 ## Engine vs. Orchestrator
 Of course the engine is not the ideal place for this decision. The Orchestrator should just know about the amount of GPUs and act accordingly.
