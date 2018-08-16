@@ -7,9 +7,9 @@ metadata:
 spec:
   containers:
   - name: trainer
-    image: qnib/plain-webtest-base:v0.1.2
+    image: qnib/plain-webtest-base:v0.2.1@sha256:ef36721536209f1d885d8ecf0e334ee835bf03c5bf8fba65f1fa6a9043dd3823
     env:
-    - name: HTTP_PORT
+    - name: WEBTEST_HTTP_PORT
       value: "9993"
     - name: CONTAINER_NAME
       value: "trainer"

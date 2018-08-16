@@ -15,12 +15,12 @@ spec:
     spec:
       containers:
       - name: policy
-        image: qnib/plain-webtest-base:v0.1.2
+        image: qnib/plain-webtest-base:v0.2.1@sha256:ef36721536209f1d885d8ecf0e334ee835bf03c5bf8fba65f1fa6a9043dd3823
         ports:
         - containerPort: 9991
           name: policy
         env:
-        - name: HTTP_PORT
+        - name: WEBTEST_HTTP_PORT
           value: "9991"
         - name: CONTAINER_NAME
           value: "policy"
@@ -29,12 +29,12 @@ spec:
             fieldRef:
               fieldPath: metadata.name
       - name: sim
-        image: qnib/plain-webtest-base:v0.1.2
+        image: qnib/plain-webtest-base:v0.2.1@sha256:ef36721536209f1d885d8ecf0e334ee835bf03c5bf8fba65f1fa6a9043dd3823
         ports:
         - containerPort: 9992
           name: sim
         env:
-        - name: HTTP_PORT
+        - name: WEBTEST_HTTP_PORT
           value: "9992"
         - name: CONTAINER_NAME
           value: "sim"
