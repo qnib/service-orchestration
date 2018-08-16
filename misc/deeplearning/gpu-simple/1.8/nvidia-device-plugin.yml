@@ -11,8 +11,15 @@ spec:
       nodeSelector:
         houdini.gpu: "true"
       containers:
-      - image: qnib/uplain-k8-gpu-dev-plugin:1.8-1
+      - image: qnib/uplain-k8-gpu-dev-plugin:1.8-2
         name: nvidia-device-plugin-ctr
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        - name: HOUDINI_KEEP_USER
+          value: "true"
+        - name: HOUDINI_GPU_ENABLED
+          value: "true"
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
