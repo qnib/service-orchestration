@@ -15,7 +15,7 @@ spec:
         houdini.gpu: "true"
       containers:
       - name: policy
-        image: qnib/uplain-webtest-houdini@sha256:0c463308c193f9eb400dda696b97b4fe63d4117018ac2f93ab214dffd392fa35
+        image: qnib/plain-webtest-base:v0.2.1@sha256:ef36721536209f1d885d8ecf0e334ee835bf03c5bf8fba65f1fa6a9043dd3823
         ports:
         - containerPort: 9991
           name: policy
