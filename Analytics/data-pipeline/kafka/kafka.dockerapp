@@ -11,36 +11,46 @@ targets:
 
 ---
 
-version: '3'
+version: '3.6'
 services:
   zookeeper:
-    image: qnib/${zk_img_name}:${zk_img_tag}
+    image: qnib/${zookeeper.name}:${zookeeper.tag}
   zkui:
-    image: qnib/plain-zkui:${zkui_img_tag}
+    image: qnib/plain-zkui:${zkui.tag}
     ports:
-      - "${zkui_port}:9090"
+      - "${zkui.port}:9090"
   broker:
-    image: qnib/${kafka_img_name}:${kafka_img_tag}
+    image: qnib/${kafka.name}:${kafka.tag}
     hostname: "{{.Service.Name}}.{{.Task.Slot}}.{{.Task.ID}}"
     deploy:
-      replicas: 3
+      mode: ${kafka.deploy.mode}
+      {{if eq .kafka.deploy.mode "replicated"}}
+      replicas: ${kafka.deploy.replicas}
+      {{end}}
     environment:
-      - KAFKA_BROKER_ID={{.Task.Slot}}
-      - LOG_MESSAGE_FORMAT_VERSION=${kafka_log_msg_format}
+      KAFKA_BROKER_ID: {{.Task.Slot}}
+      LOG_MESSAGE_FORMAT_VERSION: ${kafka.log_msg_format}
   manager:
-    image: qnib/plain-kafka-manager:${kmanager_img_tag}
+    image: qnib/plain-kafka-manager:${kmanager.tag}
     ports:
-      - "${kmanager_port}:9000"
+      - "${kmanager.port}:9000"
     environment:
       ZOOKEEPER_HOSTS: "tasks.zookeeper:2181"
 
 ---
-zk_img_name: plain-zookeeper
-zk_img_tag: 2018-04-25
-kafka_img_name: plain-kafka
-kafka_img_tag: 1.1.1
-kafka_log_msg_format: 1.0-IV0
-zkui_img_tag: 8d3441d
-zkui_port: 9090
-kmanager_img_tag: 1.3.3.18
-kmanager_port: 9000
+zookeeper:
+  name: plain-zookeeper
+  tag: 2018-04-25
+kafka:
+  deploy:
+    mode: replicated
+    replicas: 3
+  name: plain-kafka
+  tag: 1.1.1
+  log_msg_format: 1.0-IV0
+zkui:
+  tag: 8d3441d
+  port: 9090
+kmanager:
+  tag: 1.3.3.18
+  port: 9000
