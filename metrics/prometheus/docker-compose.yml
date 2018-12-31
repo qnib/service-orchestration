@@ -1,3 +1,15 @@
+---
+version: 0.0.1
+name: prometheus
+description: "Monitoring stack with prometheus"
+maintainers:
+- name: Christian Kniep
+  email: christian@qnib.org
+targets:
+  swarm: true
+  kubernetes: true
+
+---
 version: '3'
 services:
   backend:

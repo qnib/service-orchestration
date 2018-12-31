@@ -1,7 +1,8 @@
 :9323 {
-    proxy / {$DOCKER_GWBRIDGE_IP}:9323 {
+    proxy / 172.17.0.1:9323 {
             transparent
         }
+    proxy /nvidia 172.17.0.1:9999
 
     errors stderr
     tls off

@@ -38,7 +38,7 @@ services:
     image: stefanprodan/caddy
     networks: ["net"]
     environment:
-      - DOCKER_GWBRIDGE_IP=172.18.0.1
+      - DOCKER_GWBRIDGE_IP=172.17.0.1
     configs:
       - source: dockerd_config
         target: /etc/caddy/Caddyfile
@@ -228,18 +228,6 @@ services:
       interval: 5s
       timeout: 1s
       retries: 5
-
-  gpu-exporter:
-    image: qnib/pgme:ubuntu
-    networks: ["net"]
-    deploy:
-      mode: global
-      placement:
-        constraints:
-          - node.labels.houdini.gpu == true
-    environment:
-      - HOUDINI_ENABLED=true
-      - HOUDINI_GPU_ENABLED=true
 
 ---
 alertmanager:

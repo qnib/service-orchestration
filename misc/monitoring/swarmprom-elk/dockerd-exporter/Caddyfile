@@ -1,7 +1,6 @@
 :9323 {
-    proxy / {$DOCKER_GWBRIDGE_IP}:9323 {
-            transparent
-        }
+    proxy /metrics/ 172.17.0.1:9323/metrics/
+    proxy /nvidia/metrics 172.17.0.1:9999/metrics/
 
     errors stderr
     tls off

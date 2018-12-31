@@ -38,7 +38,7 @@ services:
       ES_NODE_DATA: "true"
 
   kibana:
-    image: qnib/plain-kibana:${kibana.image.tag}
+    image: qnib/${kibana.image.name}:${kibana.image.tag}
     networks:
       - net
     deploy:
@@ -80,5 +80,6 @@ logstash:
 
 kibana:
   image:
-    tag: 6.3.1
+    name: plain-kibana5
+    tag: 5.5.1
   port: 5601

@@ -12,6 +12,15 @@ targets:
 ---
 version: '3.6'
 services:
+  {{if .ldap.enabled}}
+  slapd:
+    image: qnib/plain-openldap-qnibinc@sha256:5d9316020781797628e3841dc794118cc9643c65c476fc3cf7aa7dcfe0700958
+    deploy:
+      replicas: 0
+      placement:
+        constraints:
+          - node.role == manager
+  {{end}}
   server:
     image: qnib/alplain-gocd-server:${gocd.server.img-tag}
     deploy:
@@ -29,24 +38,31 @@ services:
         gid: '0'
         mode: 0400
         configs:
+    {{if not .ldap.enabled}}
     secrets:
       - source: gocd_password_properties
         target: /etc/go/password.properties
         uid: '1000'
         gid: '1000'
         mode: 0440
+    {{end}}
     environment:
      - GOCD_SERVER_CLEAN_WORKSPACE=false
      - GOCD_AGENT_AUTOENABLE_KEY=${gocd.autoenable-key}
   agent:
     image: qnib/alplain-gocd-agent:${gocd.agent.img-tag}
     deploy:
-      replicas: ${gocd.agent.replicas}
+      mode: global
       update_config:
         parallelism: 1
         delay: 5s
       restart_policy:
         condition: on-failure
+      {{if .gocd.agent.worker}}
+      placement:
+        constraints:
+          - node.role != manager
+      {{end}}
     {{if .ucp.enabled}}
     secrets:
       - source: gocd_ucp_moby
@@ -67,25 +83,35 @@ secrets:
     external: true
 configs:
   gocd_config:
+    {{if .ldap.enabled}}
+    file: ${gocd.server.config.ldap}
+    {{else}}
     file: ${gocd.server.config.default}
+    {{end}}
 
 secrets:
+  {{if not .ldap.enabled}}
   gocd_password_properties:
     file: ./gocd_password_properties
+  {{end}}
   gocd_ucp_moby:
     external: true
 
 ---
+ldap:
+  enabled: false
+ucp:
+  enabled: false
 gocd:
   agent:
     replicas: 1
-    img-tag: 18.12.0-0
+    img-tag: 18.12.0-1
+    worker: false
   server:
     img-tag: 18.12.0-0
     https-port: 8154
     http-port: 8153
     config:
-      default: ./config/gocd-config.tar
-      ai: ./config/gocd-config-ai.tar
+      default: ./config/gocd-config-2018-12-26_18-38.tar
       ldap: ./config/gocd-config-openldap.tar
   autoenable-key: qnibFTW
