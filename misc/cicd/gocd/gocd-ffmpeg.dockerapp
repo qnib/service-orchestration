@@ -83,7 +83,7 @@ docker:
   registry: docker.io
 gocd:
   agent:
-    img-tag: 18.12.0-9
+    img-tag: 18.12.0-10
     workeronly: false
   server:
     img-tag: 18.12.0-1
