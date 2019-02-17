@@ -1,1 +1,4 @@
 ./temp/**
+config/gocd-config-tensorflow-20*.tar
+config/gocd-config-ffmpeg-20*.tar
+config/gocd-config-20*.tar

@@ -1,0 +1,102 @@
+---
+version: 0.2.1
+name: gocd
+description: "CI/CD pipeline via GoCD using one agent"
+maintainers:
+- name: Christian Kniep
+  email: christian@qnib.org
+targets:
+  swarm: true
+  kubernetes: false
+
+---
+version: '3.6'
+services:
+  server:
+    image: qnib/alplain-gocd-server:${gocd.server.img-tag}
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    ports:
+     - ${gocd.server.http-port}:8153
+     - ${gocd.server.https-port}:8154
+    configs:
+      - source: gocd_config
+        target: /opt/qnib/gocd/gocd-config.tar
+        uid: '0'
+        gid: '0'
+        mode: 0400
+        configs:
+    secrets:
+      - source: gocd_password_properties
+        target: /etc/go/password.properties
+        uid: '1000'
+        gid: '1000'
+        mode: 0440
+    environment:
+     - GOCD_SERVER_CLEAN_WORKSPACE=false
+     - GOCD_AGENT_AUTOENABLE_KEY=${gocd.autoenable-key}
+    {{if .gocd.server.localdata}}
+    volumes:
+     - /data/gocd/pipelines:/opt/go-server/pipelines
+     - /data/gocd/artifacts:/opt/go-server/artifacts
+     - /data/gocd/db:/opt/go-server/db
+    {{end}}
+  agent:
+    image: qnib/alplain-gocd-agent:${gocd.agent.img-tag}
+    deploy:
+      mode: global
+      update_config:
+        parallelism: 1
+        delay: 5s
+      restart_policy:
+        condition: on-failure
+      {{if .gocd.agent.workeronly}}
+      placement:
+        constraints:
+          - node.role != manager
+      {{end}}
+    secrets:
+      - source: gocd_docker_password
+        target: /run/secrets/${docker.registry}/${docker.user}/password
+        uid: '5000'
+        gid: '5000'
+        mode: 0400
+    environment:
+     - DOCKER_USER=${docker.user}
+     - DOCKER_REGISTRY=${docker.registry}
+     - DOCKER_USE_LOGIN=true
+     - GO_SERVER_URL=https://tasks.server:8154/go
+     - DOCKER_HOST=unix:///var/run/docker.sock
+     - GOCD_AGENT_AUTOENABLE_KEY=${gocd.autoenable-key}
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+
+
+configs:
+  gocd_config:
+    file: ${gocd.server.config.default}
+
+secrets:
+  gocd_password_properties:
+    file: ./gocd_password_properties
+  gocd_docker_password:
+    external: true
+---
+docker:
+  user: test123
+  registry: docker.io
+gocd:
+  agent:
+    img-tag: 19.1.0-5
+    workeronly: false
+  server:
+    img-tag: 19.1.0-1
+    https-port: 8154
+    http-port: 8153
+    localdata: false
+    config:
+      default: ./config/gocd-config-tensorflow.tar
+  autoenable-key: qnibFTW
