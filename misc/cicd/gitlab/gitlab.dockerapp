@@ -1,0 +1,88 @@
+---
+version: 0.0.1
+name: gitlab
+description: "GitLab Installation including container registry"
+maintainers:
+- name: Christian Kniep
+  email: christian@qnib.org
+targets:
+  swarm: true
+  kubernetes: false
+---
+version: "3.7"
+services:
+    cert:
+      # Init container (in Kubernetes speak) to populate the certificate directory
+      image: qnib/data-selfsigned-cert
+      # TODO: Switch to container that generates self-signed cert on-the-fly
+      deploy:
+        restart_policy:
+          condition: on-failure
+      volumes:
+        - certs:/certs
+      command: ["/copy", "/data/", "/certs"]
+    gitlab:
+      image: ${gitlab.gitlab.image}
+      environment:
+        GITLAB_OMNIBUS_CONFIG: |
+            external_url 'https://${gitlab.url}'
+            registry['enable'] = true
+            registry_external_url 'https://${gitlab.url}:${gitlab.ports.registry}'
+      ports:
+        - ${gitlab.ports.http}:80
+        - ${gitlab.ports.https}:443
+        - ${gitlab.ports.ssh}:22
+        - ${gitlab.ports.registry}:${gitlab.ports.registry}
+      volumes:
+        - config:/etc/gitlab
+        - logs:/var/log/gitlab
+        - data:/var/opt/gitlab
+        - type: volume
+          read_only: true
+          source: certs
+          target: /certs
+      secrets:
+          - source: crtfile
+            target: /etc/gitlab/ssl/${gitlab.url}.crt
+          - source: keyfile
+            target: /etc/gitlab/ssl/${gitlab.url}.key
+    runner:
+        image: ${gitlab.runner.image}
+        deploy:
+            mode: global
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        secrets:
+            - source: crtfile
+              target: /etc/gitlab-runner/certs/${gitlab.url}.crt
+            - source: keyfile
+              target: /etc/gitlab-runner/certs/${gitlab.url}.key
+        environment:
+            GITLAB_TOKEN: ${gitlab.runner.token}
+            GITLAB_URL: ${gitlab.url}
+
+volumes:
+    config:
+    logs:
+    data:
+    cntdata:
+    certs:
+
+secrets:
+  crtfile:
+    file: ./certs/registry-auth.crt
+  keyfile:
+    file: ./certs/registry-auth.key
+---
+gitlab:
+    url: gitlab
+    ports:
+        http: 80
+        https: 443
+        ssh: 22
+        registry: 4567
+    gitlab:
+        image: gitlab/gitlab-ce:11.10.0-ce.0
+    runner:
+        image: qnib/uplain-gitlab-runner:v0.0.3
+        token: MYTOKEN
