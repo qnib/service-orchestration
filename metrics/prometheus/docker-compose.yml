@@ -1,21 +1,10 @@
 ---
-version: 0.0.1
-name: prometheus
-description: "Monitoring stack with prometheus"
-maintainers:
-- name: Christian Kniep
-  email: christian@qnib.org
-targets:
-  swarm: true
-  kubernetes: true
-
----
 version: '3'
 services:
   backend:
-    image: qnib/plain-influxdb:1.3.7@sha256:a8df362b7a951a8cc70850c2eb8a0cdd2876d29adbf74776580e4212c618c3f2
+    image: qnib/plain-influxdb:2.7.5
     environment:
-     - INFLUXDB_DATABASES=metrics
+     - INFLUXDB_BUCKET=metrics
      - INFLUXDB_META_LOGGING=true
     volumes:
      - /opt/influxdb/shared
@@ -23,60 +12,29 @@ services:
      - 2003:2003
      - 4242:4242
      - 8086:8086
-  chronograf:
-    image: qnib/plain-chronograf:0.1.3.7@sha256:23cf1696820dc8c2d3dbb9d11388c8465d68d9256dd38ab5a4f1a38adf579128
-    ports:
-     - 8888:8888
-    environment:
-     - INFLUXDB_HOST=tasks.backend
   frontend:
-    image: qnib/plain-grafana4:4.6.2-7
+    image: grafana/grafana-oss:10.2.3
     ports:
      - 3000:3000
     environment:
      - INFLUXDB_HOST=tasks.backend
      - INFLUXDB_DB=metrics
-  cadvisor:
-    image: google/cadvisor
-    command: -logtostderr -docker_only
+  telegraf:
+    image: qnib/plain-telegraf:1.29.2-1
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /:/rootfs:ro
-      - /var/run:/var/run
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    deploy:
-      mode: global
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-  node-exporter:
-    image: quay.io/prometheus/node-exporter
-    deploy:
-      mode: global
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-    pid: "host"
-    networks: [hostnet]
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    environment:
+      - ENTRYPOINTS_DIR=/opt/entry
+      - REMOTE_URL=http://backend:8086
+      - DOCKER_SOCKET_URL=unix:///var/run/docker.sock
+      - DOCKER_GATHER_SERVICES=true
   prometheus:
-    image: qnib/plain-prometheus:2.0
+    image: qnib/plain-prometheus:2.48.1
     ports:
-      - "9090:9090"
+      - "9099:9090"
     environment:
-        STORAGE_ADAPTER_HOST: tasks.prometheus-storage-adapter:9201
-        PROMETHEUS_STATIC_SCRAPE_LIST: dockerd:172.17.0.1:9323:/metrics,node1:192.168.99.100:9100:/metrics,node2:192.168.99.101:9100:/metrics,node3:192.168.99.102:9100:/metrics
-        PROMETHEUS_DNS_SCRAPE_LIST: cadvisor:tasks.cadvisor:8080:/metrics
-  prometheus-storage-adapter:
-    image: qnib/plain-prometheus-remote-storage
-    environment:
-      INFLUXDB_HOST: tasks.backend
-      INFLUXDB_DB: metrics
-
+      - PROM_REMOTE_WRITE_URL=http://telegraf:1234/receive
+      - PROMETHEUS_STATIC_SCRAPE_LIST=prometheus:localhost:9090,cadvisor:cadvisor:8080
 networks:
   hostnet:
     external:
